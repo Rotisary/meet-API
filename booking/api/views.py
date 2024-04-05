@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.filters import SearchFilter, OrderingFilter
 
 from booking.models import IllnessDetail
 from booking.api.serializers import IllnessDetailSerializer
@@ -89,3 +90,5 @@ class api_illness_detail_list_view(ListAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     pagination_class = PageNumberPagination
+    filter_backends = ([SearchFilter, OrderingFilter])
+    search_fields = ['body_part', 'illness', 'patient__first_name', 'patient__last_name']

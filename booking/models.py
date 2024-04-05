@@ -32,6 +32,7 @@ class IllnessDetail(models.Model):
     body_part = models.CharField(choices=BODY_PART_CHOICES, blank=True, null=True)
     illness = models.CharField(choices=SPECIFIC_ILLNESS_CHOICES, blank=True, null=True)
     age = models.IntegerField(blank=False, null=False)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='created_at', null=True)
 
     def __str__(self):
         return f"illness detail {self.id}"
