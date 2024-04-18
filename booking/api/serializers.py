@@ -1,10 +1,15 @@
 from rest_framework import serializers
-from booking.models import IllnessDetail
+from booking.models import Illness
 
-class IllnessDetailSerializer(serializers.ModelSerializer):
-    first_name = serializers.CharField(source='patient.first_name', read_only=True)
-    last_name =  serializers.CharField(source='patient.last_name', read_only=True)
+
+class IllnessSerializer(serializers.HyperlinkedModelSerializer):
+    patient = serializers.HyperlinkedRelatedField(
+        view_name='user-detail', 
+        lookup_field='username',  
+        read_only=True
+    )
 
     class Meta:
-        model = IllnessDetail
-        fields = ['body_part', 'illness', 'age', 'first_name', 'last_name']
+        model = Illness
+        fields = ['url', 'body_part', 'specific_illness', 'age', 'patient', 'treated_by']
+ 

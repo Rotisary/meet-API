@@ -87,8 +87,52 @@ class User(AbstractBaseUser):
         return True
 
 
+class Profile(models.Model):
+    OPTHAMOLOGIST = 'OP'
+    OTOLARYNGOLOGIST = 'ENT'
+    DERMATOLOGY = 'DY'
+    DENTIST = 'DT'
+    PHYSIOTHERAPIST = 'PY'
+    PHYSICIAN = 'PN'
+    UROLOGIST = 'UT'
+    GYNECOLOGIST = 'GY'
+    FIELD_CHOICES = [
+        (OPTHAMOLOGIST, 'opthamologist'),
+        (OTOLARYNGOLOGIST, 'otolaryngologist'),
+        (DERMATOLOGY, 'dermatologist'),
+        (DENTIST, 'dentist'),
+        (PHYSIOTHERAPIST, 'physiotherapist'),
+        (PHYSICIAN, 'physician'),
+        (UROLOGIST, 'urologist'),
+        (GYNECOLOGIST, 'gynecologist'),
+    ] 
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='profile', on_delete=models.CASCADE)
+    specialized_field = models.TextField(choices=FIELD_CHOICES, blank=False, null=False)
+    doctor_type = models.TextField(null=False, blank=False)
+    meet = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='meets', blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='created_at')
+
+
+    def __str__(self):
+        return f"{self.user.username}'s profile"
+
+
+
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
+
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_profile(sender, instance, created=False, **kwargs):
+    if created:
+        if instance.category == 'DR':
+            Profile.objects.create(user=instance)
+
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_profile(sender, instance,  **kwargs):
+        instance.profile.save()
+    
 

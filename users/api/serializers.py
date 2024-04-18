@@ -1,15 +1,12 @@
 from rest_framework import serializers
-from rest_framework.fields import CurrentUserDefault
-from users.models import User
-from booking.api.serializers import IllnessDetailSerializer
-from booking.models import IllnessDetail
+from users.models import User, Profile
 
 
-class RegistrationSerializer(serializers.ModelSerializer):
+class RegistrationSerializer(serializers.HyperlinkedModelSerializer):
     password2 = serializers.CharField(style={'input_type': 'password'}, write_only=True)
     class Meta:
         model = User
-        fields = ['email', 'username', 'password', 'password2', 'category', 'first_name', 'last_name', 'phone_number']
+        fields = ['url', 'email', 'username', 'password', 'password2', 'category', 'first_name', 'last_name', 'phone_number']
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -33,6 +30,41 @@ class RegistrationSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+
+class UserSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = User
+        fields = ['url', 'email', 'username', 'category', 'first_name', 'last_name', 'phone_number', 'illness']
+        extra_kwargs = {
+            'url': {'lookup_field': 'username'}
+        }
+
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['email', 'username', 'first_name', 'last_name', 'phone_number']
+
+
+class ProfileSerializer(serializers.HyperlinkedModelSerializer):
+    user = serializers.HyperlinkedRelatedField(
+        view_name='user-detail',
+        lookup_field='username',
+        read_only=True
+    )
+    meet = serializers.HyperlinkedRelatedField(
+        view_name='user-detail',
+        lookup_field='username',
+        read_only=True,
+        many=True
+    )
+    class Meta:
+        model = Profile
+        fields = ['url', 'user', 'specialized_field', 'doctor_type', 'meet']
+        extra_kwargs = {
+            'url': {'lookup_url_kwarg': 'username'}
+        }
 
 
 class ChangePasswordSerializer(serializers.Serializer):
