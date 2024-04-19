@@ -133,6 +133,7 @@ def create_profile(sender, instance, created=False, **kwargs):
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_profile(sender, instance,  **kwargs):
-        instance.profile.save()
+        if instance.category == 'DR':
+            instance.profile.save()
     
 

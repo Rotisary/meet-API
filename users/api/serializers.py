@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from users.models import User, Profile
+from itertools import chain 
 
 
 class RegistrationSerializer(serializers.HyperlinkedModelSerializer):
@@ -10,6 +11,17 @@ class RegistrationSerializer(serializers.HyperlinkedModelSerializer):
         extra_kwargs = {
             'password': {'write_only': True}
         }
+
+
+    def validate_phone_number(self, value):
+        if len(value) == 11:
+            letters = chain(range(ord('A'), ord('Z') + 1), range(ord('a'), ord('z') + 1))
+            for char in letters:
+                if chr(char) in value:
+                    raise serializers.ValidationError({'error': 'the phone number is invalid'})           
+        elif len(value) > 11 or len(value) < 11:
+            raise serializers.ValidationError({'error': "phone number can't longer or shorter than eleven"})
+        return value
 
 
     def save(self):
@@ -45,6 +57,17 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['email', 'username', 'first_name', 'last_name', 'phone_number']
+    
+
+    def validate_phone_number(self, value):
+        if len(value) == 11:
+            letters = chain(range(ord('A'), ord('Z') + 1), range(ord('a'), ord('z') + 1))
+            for char in letters:
+                if chr(char) in value:
+                    raise serializers.ValidationError({'error': 'the phone number is invalid'})           
+        elif len(value) > 11 or len(value) < 11:
+            raise serializers.ValidationError({'error': "phone number can't longer or shorter than eleven"})
+        return value
 
 
 class ProfileSerializer(serializers.HyperlinkedModelSerializer):
