@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from users.models import User, Profile
+from users.models import User, Profile, DoctorReview
 from itertools import chain 
 
 
@@ -47,7 +47,7 @@ class RegistrationSerializer(serializers.HyperlinkedModelSerializer):
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields = ['url', 'email', 'username', 'category', 'first_name', 'last_name', 'phone_number', 'illness']
+        fields = ['url', 'email', 'username', 'category', 'first_name', 'last_name', 'phone_number', 'illness', 'appointments_in']
         extra_kwargs = {
             'url': {'lookup_field': 'username'}
         }
@@ -84,7 +84,7 @@ class ProfileSerializer(serializers.HyperlinkedModelSerializer):
     )
     class Meta:
         model = Profile
-        fields = ['url', 'user', 'specialized_field', 'doctor_type', 'meet']
+        fields = ['url', 'user', 'specialized_field', 'doctor_type', 'meet', 'appointments_booked', 'reviews']
         extra_kwargs = {
             'url': {'lookup_url_kwarg': 'username'}
         }
@@ -94,3 +94,11 @@ class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(write_only=True, required=True)
     password = serializers.CharField(write_only=True, required=True)
     confirm_password = serializers.CharField(write_only=True, required=True)
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    writer = serializers.StringRelatedField(read_only=True)
+    doctor = serializers.StringRelatedField(read_only=True)
+    class Meta:
+        model = DoctorReview
+        fields = ['writer', 'doctor', 'body', 'stars']

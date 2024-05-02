@@ -88,14 +88,14 @@ class User(AbstractBaseUser):
 
 
 class Profile(models.Model):
-    OPTHAMOLOGIST = 'OP'
+    OPTHAMOLOGIST = 'EY'
     OTOLARYNGOLOGIST = 'ENT'
-    DERMATOLOGY = 'DY'
+    DERMATOLOGY = 'SK'
     DENTIST = 'DT'
-    PHYSIOTHERAPIST = 'PY'
+    PHYSIOTHERAPIST = 'BN'
     PHYSICIAN = 'PN'
-    UROLOGIST = 'UT'
-    GYNECOLOGIST = 'GY'
+    UROLOGIST = 'UTI'
+    GYNECOLOGIST = 'SOI'
     FIELD_CHOICES = [
         (OPTHAMOLOGIST, 'opthamologist'),
         (OTOLARYNGOLOGIST, 'otolaryngologist'),
@@ -115,7 +115,19 @@ class Profile(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s profile"
+    
 
+    def number_of_meet(self):
+        return self.meet.count()
+
+
+class DoctorReview(models.Model):
+    writer = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='reviews_written', on_delete=models.CASCADE)
+    doctor = models.ForeignKey(Profile, related_name='reviews', on_delete=models.CASCADE)
+    body = models.TextField(blank=False)
+    stars = models.IntegerField(null=False)
+    good = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='created_at')  
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)

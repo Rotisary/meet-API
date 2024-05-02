@@ -5,13 +5,15 @@ from rest_framework.decorators import api_view, permission_classes, parser_class
 from rest_framework.parsers import JSONParser, MultiPartParser
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.generics import ListAPIView
-from rest_framework.pagination import PageNumberPagination
+# from rest_framework.generics import ListAPIView
+# from rest_framework.pagination import PageNumberPagination
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.filters import SearchFilter, OrderingFilter
+# from rest_framework.filters import SearchFilter, OrderingFilter
 
-from booking.models import Illness
-from booking.api.serializers import IllnessSerializer
+from booking.models import Illness, Appointment
+from users.models import Profile, User
+from booking.api.serializers import IllnessSerializer, AppointmentSerializer
+from booking.api.custom_permissions import UserIsDoctor, UserIsPatient
 
 
 @api_view(['GET', ])
@@ -21,15 +23,12 @@ def api_root(request):
         'illness': reverse('illness-list', request=request)
     })
 
+
 @api_view(['POST', ])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, UserIsDoctor])
 @parser_classes([JSONParser, MultiPartParser])
 def api_create_illness_view(request):  
     illness = Illness(patient=request.user)
-
-    if request.user.category == 'DR':
-        return Response({'response': 'you are not allowed to enter illness details, sign up for a patient account to do that'},
-                        status=status.HTTP_403_FORBIDDEN)
      
     if request.method == 'POST':
         serializer = IllnessSerializer(illness, data=request.data, context={'request': request})
@@ -40,7 +39,7 @@ def api_create_illness_view(request):
     
 
 @api_view(['PUT', ])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated,])
 @parser_classes([JSONParser, MultiPartParser])
 def api_update_illness_view(request, pk):
     try:
@@ -93,17 +92,114 @@ def api_illness_detail_view(request, pk):
     except Illness.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     
+    if request.user != illness.patient or request.user not in illness.patient.meets.all():
+        return Response({'error': 'permission denied'}, status=status.HTTP_403_FORBIDDEN)
+    else:
+        if request.method == 'GET':
+            serializer = IllnessSerializer(illness, context={'request': request})
+            return Response(serializer.data)
+
+
+# class api_illness_list_view(ListAPIView):
+#     queryset = Illness.objects.all()
+#     serializer_class = IllnessSerializer
+#     zauthentication_classes = (TokenAuthentication,)
+#     permission_classes = (IsAuthenticated,)
+#     renderer_classes = (JSONRenderer, BrowsableAPIRenderer)
+#     pagination_class = PageNumberPagination
+#     filter_backends = ([SearchFilter, OrderingFilter])
+#     search_fields = ['body_part', 'specific_illness', 'patient__first_name', 'patient__last_name']
+
+
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, UserIsDoctor])
+def api_add_to_doctors_meet_view(request, username):
+    doctor = Profile.objects.get(user__username=username)
+    patient = request.user
+    data = {}
+    if doctor.meet.filter(id=patient.id).first():
+        doctor.meet.remove(patient)
+        data['message'] = "you have removed yourself from this doctor's meet"
+    else:
+        if doctor.number_of_meet() < 3:
+            doctor.meet.add(patient)
+            data['message'] = "you have succesfully added yourself to this doctor's meet"
+        else:
+            data['message'] = "this doctor already has three meets, please find another qualified doctor"
+    return Response(data=data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET', ])
+@permission_classes([IsAuthenticated, UserIsDoctor])
+def api_related_doctors_list_view(request, specialty, pt_age):
     if request.method == 'GET':
-        serializer = IllnessSerializer(illness, context={'request': request})
-        return Response(serializer.data)
+        if pt_age <= 18:
+            doctors = Profile.objects.filter(specialized_field=specialty, doctor_type='pediatrician')
+        elif pt_age > 18 and pt_age < 40 :
+            doctors = Profile.objects.filter(specialized_field=specialty, doctor_type='internist')
+        elif pt_age > 40:
+            doctors = Profile.objects.filter(specialized_field=specialty, doctor_type='geriatrics')
+        doctors_list = []
+        for doctor in doctors:
+            doctors_username = doctor.user.username
+            doctors_list.append(doctors_username)
+
+        data = {'doctors': doctors_list}
+        return Response(data=data, status=status.HTTP_200_OK)
 
 
-class api_illness_list_view(ListAPIView):
-    queryset = Illness.objects.all()
-    serializer_class = IllnessSerializer
-    zauthentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-    renderer_classes = (JSONRenderer, BrowsableAPIRenderer)
-    pagination_class = PageNumberPagination
-    filter_backends = ([SearchFilter, OrderingFilter])
-    search_fields = ['body_part', 'illness', 'patient__first_name', 'patient__last_name']
+@api_view(['POST', ])
+@permission_classes([IsAuthenticated, UserIsPatient])
+@parser_classes([JSONParser, MultiPartParser])
+def api_create_appointment_view(request, username):  
+    try:    
+        appointment_patient = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'POST':
+        serializer = AppointmentSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save(owner=request.user.profile, patient=appointment_patient)
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['PUT', ])
+@permission_classes([IsAuthenticated])
+@parser_classes([JSONParser, MultiPartParser])
+def api_update_appointment_view(request, pk):
+    try:
+        appointment = Appointment.objects.get(id=pk)
+    except Appointment.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    user = request.user
+    if appointment.owner != user:
+        return Response({'response': 'you are not allowed to update this appointment'}, status=status.HTTP_403_FORBIDDEN)
+    else:
+        if request.method == 'PUT':
+            serializer = AppointmentSerializer(appointment, data=request.data, partial=True)
+            data = {}
+            if serializer.is_valid():
+                serializer.save()
+                data['success'] = 'update successful'
+                return Response(data=data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['GET', ])
+@permission_classes([IsAuthenticated])
+@renderer_classes([JSONRenderer, BrowsableAPIRenderer])
+def api_appointment_detail_view(request, pk):
+    try:
+        appointment = Appointment.objects.get(id=pk)
+    except Appointment.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    if request.user.profile != appointment.owner or request.user != appointment.patient:
+        return Response({'response': 'permission denied'}, status=status.HTTP_403_FORBIDDEN)
+    else:
+        if request.method == 'GET':
+            serializer = AppointmentSerializer(appointment, context={'request': request})
+            return Response(serializer.data)
