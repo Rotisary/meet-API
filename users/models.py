@@ -144,7 +144,7 @@ def create_profile(sender, instance, created=False, **kwargs):
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_profile(sender, instance,  **kwargs):
+def save_profile(sender, instance,  **kwargs):
         if instance.category == 'DR':
             instance.profile.save()
     

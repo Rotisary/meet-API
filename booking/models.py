@@ -2,6 +2,7 @@ from django.db import models
 from users.models import Profile
 from django.conf import settings
 
+
 class Illness(models.Model):
     EYE = 'EY'
     EAR = 'ER'
@@ -29,11 +30,13 @@ class Illness(models.Model):
         (URINARY_TRACT_INFECTION, 'urinary tract infection'),
         (SEX_ORGAN_ILLNESS, 'sex organ illness'),
     ]
-    patient = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='illness', on_delete=models.CASCADE)
+    patient = models.ForeignKey(settings.AUTH_USER_MODEL, 
+                                related_name='illness', 
+                                on_delete=models.CASCADE)
     body_part = models.CharField(choices=BODY_PART_CHOICES, blank=True, null=True)
     specific_illness = models.CharField(choices=SPECIFIC_ILLNESS_CHOICES, blank=True, null=True)
     age = models.IntegerField(blank=False, null=False)
-    treated_by = models.OneToOneField(settings.AUTH_USER_MODEL, 
+    treated_by = models.ForeignKey(settings.AUTH_USER_MODEL, 
                                       related_name='illness_treated', 
                                       blank=True, 
                                       null=True, 

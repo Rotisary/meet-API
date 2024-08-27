@@ -3,13 +3,15 @@ from users.models import User, Profile, DoctorReview
 from itertools import chain 
 
 
-class RegistrationSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.HyperlinkedModelSerializer):
     password2 = serializers.CharField(style={'input_type': 'password'}, write_only=True)
     class Meta:
         model = User
-        fields = ['url', 'email', 'username', 'password', 'password2', 'category', 'first_name', 'last_name', 'phone_number']
+        fields = ['url', 'email', 'username', 'password', 'password2', 'category', 'first_name', 'last_name', 'phone_number',  'illness', 'meets', 'appointments_in']
         extra_kwargs = {
-            'password': {'write_only': True}
+            'password': {'write_only': True},
+            'url': {'lookup_field': 'username'},
+            'meets': {'lookup_url_kwarg': 'username'}
         }
 
 
@@ -20,7 +22,7 @@ class RegistrationSerializer(serializers.HyperlinkedModelSerializer):
                 if chr(char) in value:
                     raise serializers.ValidationError({'error': 'the phone number is invalid'})           
         elif len(value) > 11 or len(value) < 11:
-            raise serializers.ValidationError({'error': "phone number can't longer or shorter than eleven"})
+            raise serializers.ValidationError({'error': "phone number can't be longer or shorter than eleven"})
         return value
 
 
@@ -43,14 +45,6 @@ class RegistrationSerializer(serializers.HyperlinkedModelSerializer):
         user.save()
         return user
 
-
-class UserSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = User
-        fields = ['url', 'email', 'username', 'category', 'first_name', 'last_name', 'phone_number', 'illness', 'appointments_in']
-        extra_kwargs = {
-            'url': {'lookup_field': 'username'}
-        }
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
@@ -96,7 +90,7 @@ class ChangePasswordSerializer(serializers.Serializer):
     confirm_password = serializers.CharField(write_only=True, required=True)
 
 
-class ReviewSerializer(serializers.ModelSerializer):
+class ReviewSerializer(serializers.HyperlinkedModelSerializer):
     writer = serializers.StringRelatedField(read_only=True)
     doctor = serializers.StringRelatedField(read_only=True)
     class Meta:

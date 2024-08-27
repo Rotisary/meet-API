@@ -84,14 +84,25 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'users.api.custom_throttles.BurstUserRateThrottle',
+        'users.api.custom_throttles.SustainedUserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '50/day',
+        'burst': '30/min',
+        'sustained': '100/day'
+    },
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 3,
+    'PAGE_SIZE': 2,
     'DEFAULT_PARSER_CLASS': [
         'rest_framework.parsers.FileUploadParser'
     ],
     'DEFAULT_RENDERER_CLASS': [
         'rest_framework.renderers.JSONRenderer'
-    ]
+    ],
+    'DEFAULT_METADATA_CLASS': 'rest_framework.metadata.SimpleMetadata'
 }
 
 AUTH_USER_MODEL = "users.User"

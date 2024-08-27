@@ -12,7 +12,6 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.generics import UpdateAPIView, ListAPIView
 
 from users.api.serializers import (
-    RegistrationSerializer, 
     UserSerializer, 
     UserUpdateSerializer,
     ProfileSerializer,
@@ -20,7 +19,7 @@ from users.api.serializers import (
     ChangePasswordSerializer
 )
 from users.models import User, Profile, DoctorReview
-from booking.api.custom_permissions import UserIsDoctor, UserIsPatient
+from booking.api.custom_permissions import UserIsDoctor, UserIsPatient, ReviewDetailPerm
 
 
 @api_view(['POST', ])
@@ -28,7 +27,7 @@ from booking.api.custom_permissions import UserIsDoctor, UserIsPatient
 @parser_classes([JSONParser, MultiPartParser])
 def registration_view(request):
     if request.method == 'POST':
-        serializer = RegistrationSerializer(data=request.data)
+        serializer = UserSerializer(data=request.data)
         data = {}
         if serializer.is_valid():
             newuser = serializer.save()
@@ -49,13 +48,13 @@ def registration_view(request):
 class ObtainAuthTokenView(APIView):
     authentication_classes = []
     permission_classes = []
-    parser_classes = [JSONParser, ]
+    parser_classes = [JSONParser, MultiPartParser]
     
 
     def post(self, request):
         context = {}
 
-        email = request.POST.get('username').lower()
+        email = request.POST.get('username')
         password = request.POST.get('password')
         account = authenticate(email=email, password=password)
 
@@ -84,22 +83,14 @@ def api_user_detail_view(request, username):
     try:
         user = User.objects.get(username=username)
     except User.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    
-    meets = user.meets.all()
-    meets_list = []
-    for meet in meets:
-        meet_username = meet.user.username
-        meets_list.append(meet_username)
+        return Response({'error': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
 
-    if request.user != user or request.user.profile not in user.meets.all():
+    if request.user != user:
         return Response({'error': 'permission denied'}, status=status.HTTP_403_FORBIDDEN)
     else:
-        data = {}
         if request.method == 'GET':
             serializer = UserSerializer(user, context={'request': request})
-            data['details'] = serializer.data
-            data['meets'] = meets_list
+            data = serializer.data
             return Response(data=data)
 
 
@@ -112,7 +103,7 @@ def api_update_user_detail_view(request, username):
     except Profile.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     
-    if request.user.username != user.username or request.user.category == 'DR':
+    if request.user != user:
         return Response({'permission': 'you are not authorized to update this profile'}, status=status.HTTP_403_FORBIDDEN)
     else:
         if request.method == 'PUT':
@@ -158,7 +149,7 @@ class ChangePasswordApiView(UpdateAPIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-
+# needs a lil' change
 @api_view(['GET', ])
 @permission_classes([IsAuthenticated])
 @renderer_classes([JSONRenderer, BrowsableAPIRenderer])
@@ -216,7 +207,7 @@ def api_update_profile_view(request, username):
 
 
 @api_view(['POST', ])
-@permission_classes([IsAuthenticated, UserIsDoctor])
+@permission_classes([IsAuthenticated, UserIsPatient])
 @parser_classes([JSONParser, MultiPartParser])
 def api_create_review_view(request, username):
     try:
@@ -244,8 +235,9 @@ def api_review_detail_view(request, pk):
     except DoctorReview.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     
-    user = request.user
-    if user.category == 'DR' and user != review.doctor.user:
+
+    permission_class = ReviewDetailPerm()
+    if not permission_class.has_object_permission(request, None, review):
         return Response({'response': 'you are not allowed to view this page'},
                         status=status.HTTP_403_FORBIDDEN)
     else:
@@ -276,9 +268,8 @@ def api_delete_review_view(request, pk):
             return Response(data=data)
     
 
-
 @api_view(['GET', ])
-@permission_classes([IsAuthenticated, UserIsDoctor])
+@permission_classes([IsAuthenticated, UserIsPatient])
 @renderer_classes([JSONRenderer, BrowsableAPIRenderer])
 def api_review_list_view(request, username):
     reviews = DoctorReview.objects.filter(doctor__user__username=username)

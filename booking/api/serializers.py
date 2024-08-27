@@ -8,7 +8,11 @@ class IllnessSerializer(serializers.HyperlinkedModelSerializer):
         lookup_field='username',  
         read_only=True
     )
-
+    treated_by = serializers.HyperlinkedRelatedField(
+        view_name='user-detail',
+        lookup_field='username',
+        read_only=True
+    )
     class Meta:
         model = Illness
         fields = ['url', 'body_part', 'specific_illness', 'age', 'patient', 'treated_by']
@@ -36,5 +40,6 @@ class AppointmentSerializer(serializers.HyperlinkedModelSerializer):
         instance.patient = validated_data.get('patient', instance.patient)
         instance.date_of_appointment = validated_data.get('date_of_appointment', instance.date_of_appointment)
         instance.time_of_appointment = validated_data.get('time_of_appointment', instance.time_of_appointment)
-        return instance.save()
+        instance.save()
+        return instance
  
