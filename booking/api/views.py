@@ -16,6 +16,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.exceptions import NotFound, PermissionDenied
 
 from booking.models import Illness, Appointment
 from users.models import Profile, User
@@ -47,7 +48,7 @@ def api_create_illness_view(request):
     if request.method == 'POST':
         serializer = IllnessSerializer(illness, data=request.data, context={'request': request})
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(raise_exception=True)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
@@ -59,21 +60,21 @@ def api_create_illness_view(request):
 def api_update_illness_view(request, pk):
     try:
         illness = Illness.objects.get(id=pk)
+    
+        user = request.user
+        if illness.patient != user:
+            raise PermissionDenied
+        
+        if request.method == 'PUT':
+            serializer = IllnessSerializer(illness, data=request.data, partial=True)
+            data = {}
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                data['success'] = 'update successful'
+                return Response(data=data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Illness.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    
-    user = request.user
-    if illness.patient != user:
-        return Response({'response': 'you are not allowed to update this illness detail'}, status=status.HTTP_403_FORBIDDEN)
-    
-    if request.method == 'PUT':
-        serializer = IllnessSerializer(illness, data=request.data, partial=True)
-        data = {}
-        if serializer.is_valid():
-            serializer.save()
-            data['success'] = 'update successful'
-            return Response(data=data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+         raise NotFound(detail='this illness does not exist')
     
 
 @api_view(['DELETE', ])
@@ -81,21 +82,21 @@ def api_update_illness_view(request, pk):
 def api_delete_illness_view(request, pk):
     try:
         illness = Illness.objects.get(id=pk)
-    except Illness.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
     
-    user = request.user
-    if illness.patient != user:
-        return Response({'response': 'you are not allowed to delete that!'}, status=status.HTTP_403_FORBIDDEN)
-       
-    if request.method == 'DELETE':
-        operation = illness.delete()
-        data = {}
-        if operation:
-            data['success'] = 'delete successful'
-        else:
-            data['failure'] = 'delete failed'
-        return Response(data=data)
+        user = request.user
+        if illness.patient != user:
+            raise PermissionDenied
+        
+        if request.method == 'DELETE':
+            operation = illness.delete()
+            data = {}
+            if operation:
+                data['success'] = 'delete successful'
+            else:
+                data['failure'] = 'delete failed'
+            return Response(data=data)
+    except Illness.DoesNotExist:
+        raise NotFound(detail='this illness does not exist')
     
 
 @api_view(['GET', ])
@@ -104,16 +105,16 @@ def api_delete_illness_view(request, pk):
 def api_illness_detail_view(request, pk):
     try:
         illness = Illness.objects.get(id=pk)
-    except Illness.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
     
-    permission_class = IllnessDetailPerm()
-    if not permission_class.has_object_permission(request, None, illness):
-        return Response({'error': 'permission denied'}, status=status.HTTP_403_FORBIDDEN)
-    else:
-        if request.method == 'GET':
-            serializer = IllnessSerializer(illness, context={'request': request})
-            return Response(serializer.data)
+        permission_class = IllnessDetailPerm()
+        if not permission_class.has_object_permission(request, None, illness):
+            raise PermissionDenied
+        else:
+            if request.method == 'GET':
+                serializer = IllnessSerializer(illness, context={'request': request})
+                return Response(serializer.data)
+    except Illness.DoesNotExist:
+        raise NotFound(detail='this illness does not exist')
 
 
 class api_illness_list_view(ListAPIView):
@@ -172,15 +173,15 @@ def api_add_to_doctors_meet_view(request, username):
 def api_create_appointment_view(request, username):  
     try:    
         appointment_patient = User.objects.get(username=username)
-    except User.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
     
-    if request.method == 'POST':
-        serializer = AppointmentSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            serializer.save(owner=request.user.profile, patient=appointment_patient)
-            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if request.method == 'POST':
+            serializer = AppointmentSerializer(data=request.data, context={'request': request})
+            if serializer.is_valid(raise_exception=True):
+                serializer.save(owner=request.user.profile, patient=appointment_patient)
+                return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except User.DoesNotExist:
+        raise NotFound(detail='this patient does not exist')
     
 
 @api_view(['PUT', ])
@@ -189,21 +190,21 @@ def api_create_appointment_view(request, username):
 def api_update_appointment_view(request, pk):
     try:
         appointment = Appointment.objects.get(id=pk)
-    except Appointment.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
     
-    user = request.user
-    if appointment.owner != user.profile:
-        return Response({'response': 'you are not allowed to update this appointment'}, status=status.HTTP_403_FORBIDDEN)
-    else:
-        if request.method == 'PUT':
-            serializer = AppointmentSerializer(appointment, data=request.data, partial=True)
-            data = {}
-            if serializer.is_valid():
-                serializer.save()
-                data['success'] = 'update successful'
-                return Response(data=data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        user = request.user
+        if appointment.owner != user.profile:
+             raise PermissionDenied
+        else:
+            if request.method == 'PUT':
+                serializer = AppointmentSerializer(appointment, data=request.data, partial=True)
+                data = {}
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                    data['success'] = 'update successful'
+                    return Response(data=data)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Appointment.DoesNotExist:
+        raise NotFound(detail='this appointment does not exist')
     
 
 @api_view(['GET', ])
@@ -212,13 +213,13 @@ def api_update_appointment_view(request, pk):
 def api_appointment_detail_view(request, pk):
     try:
         appointment = Appointment.objects.get(id=pk)
-    except Appointment.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
     
-    permission_class = AppointmentDetailPerm()
-    if not permission_class.has_object_permission(request, None, appointment):
-        return Response({'error': 'permission denied'}, status=status.HTTP_403_FORBIDDEN)
-    else:
-        if request.method == 'GET':
-            serializer = AppointmentSerializer(appointment, context={'request': request})
-            return Response(serializer.data)
+        permission_class = AppointmentDetailPerm()
+        if not permission_class.has_object_permission(request, None, appointment):
+             raise PermissionDenied
+        else:
+            if request.method == 'GET':
+                serializer = AppointmentSerializer(appointment, context={'request': request})
+                return Response(serializer.data)
+    except Appointment.DoesNotExist:
+        raise NotFound(detail='this appointment does not exist')

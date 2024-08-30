@@ -102,7 +102,8 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASS': [
         'rest_framework.renderers.JSONRenderer'
     ],
-    'DEFAULT_METADATA_CLASS': 'rest_framework.metadata.SimpleMetadata'
+    'DEFAULT_METADATA_CLASS': 'rest_framework.metadata.SimpleMetadata',
+    'EXCEPTION_HANDLER': 'users.api.utils.custom_exception_handler'
 }
 
 AUTH_USER_MODEL = "users.User"
@@ -123,7 +124,7 @@ DATABASES = {
         'USER': DB_USER,
         'PASSWORD': DB_PASSWORD,
         'HOST': 'localhost',
-        'PORT': '5432'
+        'PORT': '5432',
     }
 }
 
