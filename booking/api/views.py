@@ -6,14 +6,11 @@ from rest_framework.decorators import (
     permission_classes, 
     parser_classes, 
     renderer_classes, 
-    throttle_classes,
     )
-# from django.views.decorators.cache import cache_page
 from rest_framework.parsers import JSONParser, MultiPartParser
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListAPIView
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.exceptions import NotFound, PermissionDenied
@@ -47,8 +44,8 @@ def api_create_illness_view(request):
      
     if request.method == 'POST':
         serializer = IllnessSerializer(illness, data=request.data, context={'request': request})
-        if serializer.is_valid():
-            serializer.save(raise_exception=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
@@ -132,7 +129,6 @@ class api_illness_list_view(ListAPIView):
         return queryset
 
 
-# needs a lil' change
 @api_view(['GET', ])
 @permission_classes([IsAuthenticated, UserIsPatient])
 def api_related_doctors_list_view(request, specialty, pt_age):

@@ -5,12 +5,11 @@ from rest_framework.parsers import JSONParser, MultiPartParser
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.generics import UpdateAPIView, ListAPIView
-from rest_framework.exceptions import APIException, PermissionDenied, NotFound
+from rest_framework.generics import UpdateAPIView
+from rest_framework.exceptions import PermissionDenied, NotFound
 
 from users.api.serializers import (
     UserSerializer, 
@@ -20,7 +19,8 @@ from users.api.serializers import (
     ChangePasswordSerializer
 )
 from users.models import User, Profile, DoctorReview
-from booking.api.custom_permissions import UserIsDoctor, UserIsPatient, ReviewDetailPerm
+from booking.api.custom_permissions import UserIsPatient, ReviewDetailPerm
+from .utils import CustomPagination
 
 
 @api_view(['POST', ])
@@ -140,18 +140,27 @@ class ChangePasswordApiView(UpdateAPIView):
             new_password = serializer.validated_data['password']
             confirm_password = serializer.validated_data['confirm_password']
             if not self.object.check_password(serializer.validated_data['old_password']):
-                return Response({'old_password': 'wrong password! please enter correct password'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({
+                    'old_password': 'wrong password! please enter correct password'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                    )
 
             if confirm_password != new_password:
-                return Response({'confirm password': 'the passwords must match!'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({
+                    'confirm password': 'the passwords must match!'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                    )
             
             self.object.set_password(new_password)
             self.object.save()
-            return Response({'password': 'password changed successfully!'}, status=status.HTTP_200_OK)
+            return Response({
+                'password': 'password changed successfully!'}, 
+                status=status.HTTP_200_OK
+                )
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-# needs a lil' change
+
+
 @api_view(['GET', ])
 @permission_classes([IsAuthenticated])
 @renderer_classes([JSONRenderer, BrowsableAPIRenderer])
@@ -246,6 +255,7 @@ def api_review_detail_view(request, pk):
     except DoctorReview.DoesNotExist:
         raise NotFound(detail='this review does not exist')
 
+
 @api_view(['DELETE', ])
 @permission_classes([IsAuthenticated])
 def api_delete_review_view(request, pk):
@@ -275,5 +285,7 @@ def api_review_list_view(request, username):
     reviews = DoctorReview.objects.filter(doctor__user__username=username)
 
     if request.method == 'GET':
-        serializer = ReviewSerializer(reviews,  many=True, context={'request': request})
-        return Response(serializer.data)
+        paginator_class = CustomPagination()
+        queryset = paginator_class.paginate_queryset(reviews, request, None)
+        serializer = ReviewSerializer(queryset,  many=True, context={'request': request})
+        return paginator_class.get_paginated_response(data=serializer.data)
