@@ -166,14 +166,19 @@ def api_related_doctors_list_view(request, pk):
             year_of_birth = complaint.year_of_birth
             age_group = complaint.age_group
 
-            specialisations_list, issues = get_api_data(token, symptom_id_list, sex, year_of_birth)
+            specialisations_list, issues = get_api_data(
+                token, 
+                symptom_id_list, 
+                sex, 
+                year_of_birth
+            )
 
             doctors = Profile.objects.all()
             doctors_that_match = []
 
             for doctor in doctors:
                 for specialisation_data in specialisations_list:
-                    if doctor.specialized_field == specialisation_data and doctor.patient_type == age_group:
+                    if doctor.specialization == specialisation_data and doctor.patient_type == age_group:
                         doctors_that_match.append(doctor)         
 
             data = {
@@ -182,7 +187,8 @@ def api_related_doctors_list_view(request, pk):
             if not doctors_that_match:
                 data['message'] = "sorry, we don't any have doctor that can treat your probable illness. Please try again later"
             else:
-                serializer = ProfileSerializer(set(doctors_that_match), many=True, context={'request': request})
+                doctors_that_match_sorted = sorted(doctors_that_match, key=lambda doctor: -doctor.rating)
+                serializer = ProfileSerializer(set(doctors_that_match_sorted), many=True, context={'request': request})
                 data['doctor suggestions'] = serializer.data
             return Response(data=data, status=status.HTTP_200_OK)
         except Complaint.DoesNotExist:

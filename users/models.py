@@ -130,9 +130,10 @@ class Profile(models.Model):
         (OLD_ADULT, 'Old Adult')
     ]
     user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='profile', on_delete=models.CASCADE)
-    specialized_field = models.CharField(blank=False, null=False)
+    specialization = models.CharField(blank=False, null=False)
     patient_type = models.CharField(choices=AGE_GROUP_CHOICES, null=False, blank=False)
     meet = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='meets', blank=True)
+    rating = models.FloatField(default=0)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='created_at')
 
 
@@ -151,6 +152,19 @@ class DoctorReview(models.Model):
     stars = models.IntegerField(null=False)
     good = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='created_at')  
+
+    def save(self, *args, **kwargs):
+        profile_reviews = self.doctor.reviews.all() 
+        no_of_reviews = profile_reviews.count()
+        sum_of_stars = 0
+        for review in profile_reviews:
+            sum_of_stars += review.stars
+        try:
+            self.doctor.rating = sum_of_stars/no_of_reviews
+        except ZeroDivisionError:
+            self.doctor.rating = 0
+        self.doctor.save()
+        super().save(*args, **kwargs)
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)

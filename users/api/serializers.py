@@ -106,9 +106,10 @@ class ProfileSerializer(serializers.HyperlinkedModelSerializer):
     )
     class Meta:
         model = Profile
-        fields = ['url', 'user', 'specialized_field', 'patient_type', 'meet', 'appointments_booked', 'reviews']
+        fields = ['url', 'user', 'specialization', 'patient_type', 'meet', 'appointments_booked', 'reviews', 'rating']
         extra_kwargs = {
-            'url': {'lookup_url_kwarg': 'username'}
+            'url': {'lookup_url_kwarg': 'username'},
+            'rating': {'read_only': True} 
         }
 
 

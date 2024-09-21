@@ -189,26 +189,9 @@ def api_profile_view(request, username):
         if request.user != profile.user:
             raise PermissionDenied
         else:
-            data = {}
-            if request.method == 'GET':
-
-                reviews = profile.reviews.all()
-                no_of_reviews = reviews.count()
-                sum_of_stars = 0
-                for review in reviews:
-                    sum_of_stars += review.stars
-
-                try:
-                    rating = sum_of_stars/no_of_reviews
-                except ZeroDivisionError:
+            if request.method == 'GET': 
                     serializer = ProfileSerializer(profile, context={'request': request})
-                    data['details'] = serializer.data
-                    data['rating'] = "you don't have a rating yet"
-                else: 
-                    serializer = ProfileSerializer(profile, context={'request': request})
-                    data['details'] = serializer.data
-                    data['rating'] = rating
-                return Response(data=data)
+                    return Response(data=serializer.data)
     except Profile.DoesNotExist:
         raise NotFound(detail='this profile does not exist')
 
