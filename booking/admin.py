@@ -1,9 +1,14 @@
 from django.contrib import admin
-from .models import Illness, Appointment
+from .models import Complaint, Appointment, Symptom
 
 
-class IllnessAdmin(admin.ModelAdmin):
-    list_display = ['patient', 'body_part', 'specific_illness', 'age', 'created_at']
+class SymptomAdmin(admin.ModelAdmin):
+    list_display = ['Name', 'ID']
+    search_fields = ['Name', 'ID']
+
+
+class ComplaintAdmin(admin.ModelAdmin):
+    list_display = ['patient', 'sex', 'year_of_birth', 'age_group', 'created_at']
     search_fields = ['body_part', 'illness', 'patient__username']
     readonly_fields = ['created_at']
 
@@ -14,5 +19,6 @@ class AppointmentAdmin(admin.ModelAdmin):
     readonly_fields = ['created_at']
 
 
-admin.site.register(Illness, IllnessAdmin)
+admin.site.register(Symptom, SymptomAdmin)
+admin.site.register(Complaint, ComplaintAdmin)
 admin.site.register(Appointment, AppointmentAdmin)

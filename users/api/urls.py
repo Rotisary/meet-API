@@ -8,6 +8,7 @@ from users.api.views import (
     api_create_review_view,
     api_review_detail_view,
     api_review_list_view,
+    CreateAPIAccount,
     ObtainAuthTokenView,
     ChangePasswordApiView,
 )
@@ -23,5 +24,6 @@ urlpatterns = [
     path('details/<str:username>/update/', api_update_user_detail_view, name='patient-profile-update'),
     path('review/<str:username>/create/', api_create_review_view, name='create-review'),
     path('review/<int:pk>/', api_review_detail_view, name='doctorreview-detail'),
-    path('reviews/<str:username>/list/', api_review_list_view, name='review-list')
+    path('reviews/<str:username>/list/', api_review_list_view, name='review-list'),
+    path('account/create/apiuser/', CreateAPIAccount, name='create-api-account')
 ]

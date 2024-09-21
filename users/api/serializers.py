@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from users.models import User, Profile, DoctorReview
+from users.models import User, Profile, DoctorReview, APIUser
 from itertools import chain 
 
 
@@ -46,6 +46,34 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         return user
 
 
+class APIUserSerializer(serializers.HyperlinkedModelSerializer):
+    password2 = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+    class Meta:
+        model = APIUser
+        fields = ['url', 'email', 'username', 'password', 'password2', 'first_name', 'last_name', 'phone_number']
+        extra_kwargs = {
+            'password' : {'write_only': True},
+            'url': {'lookup_field': 'username'}
+        }
+
+    def save(self):
+        user = APIUser(
+                email = self.validated_data['email'].lower(),
+                username = self.validated_data['username'],
+                first_name = self.validated_data['first_name'].lower(),
+                last_name = self.validated_data['last_name'].lower(),
+                phone_number = self.validated_data['phone_number']
+            )
+        password = self.validated_data['password']
+        password2 = self.validated_data['password2']
+    
+
+        if password != password2:
+            raise serializers.ValidationError({'password': "second password does not match the first!"})
+        user.set_password(password)
+        user.save()
+        return user
+
 
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -78,7 +106,7 @@ class ProfileSerializer(serializers.HyperlinkedModelSerializer):
     )
     class Meta:
         model = Profile
-        fields = ['url', 'user', 'specialized_field', 'doctor_type', 'meet', 'appointments_booked', 'reviews']
+        fields = ['url', 'user', 'specialized_field', 'patient_type', 'meet', 'appointments_booked', 'reviews']
         extra_kwargs = {
             'url': {'lookup_url_kwarg': 'username'}
         }

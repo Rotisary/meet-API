@@ -1,8 +1,15 @@
 from rest_framework import serializers
-from booking.models import Illness, Appointment
+from booking.models import Complaint, Appointment, Symptom
+
+# more validations; validation for Complaint update and delete
+# update; if they leave a field empty, it should show a message, if they enter a wrong field, it should show a message
 
 
-class IllnessSerializer(serializers.HyperlinkedModelSerializer):
+class ComplaintSerializer(serializers.HyperlinkedModelSerializer):
+    symptoms = serializers.StringRelatedField(
+        read_only=True,
+        many=True
+    )
     patient = serializers.HyperlinkedRelatedField(
         view_name='user-detail', 
         lookup_field='username',  
@@ -14,8 +21,12 @@ class IllnessSerializer(serializers.HyperlinkedModelSerializer):
         read_only=True
     )
     class Meta:
-        model = Illness
-        fields = ['url', 'body_part', 'specific_illness', 'age', 'patient', 'treated_by']
+        model = Complaint
+        fields = ['url', 'symptoms', 'sex', 'year_of_birth', 'age_group', 'patient', 'treated_by']
+
+
+    def create(self, validated_data):
+        return Complaint.objects.create(**validated_data)
 
 
 class AppointmentSerializer(serializers.HyperlinkedModelSerializer):
@@ -42,4 +53,3 @@ class AppointmentSerializer(serializers.HyperlinkedModelSerializer):
         instance.time_of_appointment = validated_data.get('time_of_appointment', instance.time_of_appointment)
         instance.save()
         return instance
- 

@@ -18,7 +18,7 @@ class UserIsDoctor(permissions.BasePermission):
         return not request.user.category == 'PT'
     
 
-class IllnessDetailPerm(permissions.BasePermission):
+class ComplaintDetailPerm(permissions.BasePermission):
         
     def has_object_permission(self, request, view, obj):
         if request.user.category == 'PT':
@@ -39,7 +39,7 @@ class ReviewDetailPerm(permissions.BasePermission):
         return request.user.category == 'PT' or request.user == obj.doctor.user 
 
 
-class DoctorsIllnessPerm(permissions.BasePermission):
+class DoctorsComplaintPerm(permissions.BasePermission):
     message = 'bad request'
     
     def has_permission(self, request, view):

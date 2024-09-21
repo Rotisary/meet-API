@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Profile, DoctorReview
+from .models import User, Profile, DoctorReview, APIUser
 
 
 class NewUserAdmin(UserAdmin):
@@ -12,6 +12,7 @@ class NewUserAdmin(UserAdmin):
     list_filter = ()
     fieldsets = ()
 
+
 class DoctorReviewAdmin(admin.ModelAdmin):
     list_display = ('writer', 'doctor', 'stars', 'created_at')
     search_fields = ('writer__username', 'doctor__user__username')
@@ -19,7 +20,7 @@ class DoctorReviewAdmin(admin.ModelAdmin):
 
 
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'specialized_field', 'doctor_type', 'created_at')
+    list_display = ('user', 'specialized_field', 'patient_type', 'created_at')
     search_fields = ('user__username', )
     readonly_fields = ('created_at', )
 
@@ -30,5 +31,6 @@ class ProfileAdmin(admin.ModelAdmin):
 
 
 admin.site.register(User, NewUserAdmin)
+admin.site.register(APIUser)
 admin.site.register(Profile, ProfileAdmin)
 admin.site.register(DoctorReview, DoctorReviewAdmin)

@@ -52,9 +52,11 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser):
     DOCTOR = 'DR'
     PATIENT = 'PT'
+    API_USER = 'API'
     CATEGORY_CHOICE = [
         (DOCTOR, 'doctor'),
         (PATIENT, 'patient'),
+        (API_USER, 'api user')
     ]
     email = models.EmailField(verbose_name='email', unique=True)
     username = models.CharField(max_length=30, unique=True)
@@ -64,6 +66,7 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
+    is_api_user = models.BooleanField(default=False)
     category = models.TextField(choices=CATEGORY_CHOICE, max_length=20)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
@@ -85,30 +88,50 @@ class User(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return True
+    
+
+class APIUser(User):
+    class Meta:
+        proxy = True
+
+    def save(self, *args, **kwargs):
+        self.category = 'API'
+        self.is_api_user = True
+        return super().save(*args, **kwargs)
 
 
 class Profile(models.Model):
-    OPTHAMOLOGIST = 'EY'
-    OTOLARYNGOLOGIST = 'ENT'
-    DERMATOLOGY = 'SK'
-    DENTIST = 'DT'
-    PHYSIOTHERAPIST = 'BN'
-    PHYSICIAN = 'PN'
-    UROLOGIST = 'UTI'
-    GYNECOLOGIST = 'SOI'
-    FIELD_CHOICES = [
-        (OPTHAMOLOGIST, 'opthamologist'),
-        (OTOLARYNGOLOGIST, 'otolaryngologist'),
-        (DERMATOLOGY, 'dermatologist'),
-        (DENTIST, 'dentist'),
-        (PHYSIOTHERAPIST, 'physiotherapist'),
-        (PHYSICIAN, 'physician'),
-        (UROLOGIST, 'urologist'),
-        (GYNECOLOGIST, 'gynecologist'),
-    ] 
+    # OPTHAMOLOGIST = 'EY'
+    # OTOLARYNGOLOGIST = 'ENT'
+    # DERMATOLOGY = 'SK'
+    # DENTIST = 'DT'
+    # PHYSIOTHERAPIST = 'BN'
+    # PHYSICIAN = 'PN'
+    # UROLOGIST = 'UTI'
+    # GYNECOLOGIST = 'SOI'
+    # FIELD_CHOICES = [
+    #     (OPTHAMOLOGIST, 'opthamologist'),
+    #     (OTOLARYNGOLOGIST, 'otolaryngologist'),
+    #     (DERMATOLOGY, 'dermatologist'),
+    #     (DENTIST, 'dentist'),
+    #     (PHYSIOTHERAPIST, 'physiotherapist'),
+    #     (PHYSICIAN, 'physician'),
+    #     (UROLOGIST, 'urologist'),
+    #     (GYNECOLOGIST, 'gynecologist'),
+    # ]
+    PRETEEN = 'PT'
+    TEENAGER = 'TN'
+    ADULT = 'AD'
+    OLD_ADULT = 'OAD'
+    AGE_GROUP_CHOICES = [
+        (PRETEEN, 'Preteen'),
+        (TEENAGER, 'Teenager'),
+        (ADULT, 'Adult'),
+        (OLD_ADULT, 'Old Adult')
+    ]
     user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='profile', on_delete=models.CASCADE)
-    specialized_field = models.TextField(choices=FIELD_CHOICES, blank=False, null=False)
-    doctor_type = models.TextField(null=False, blank=False)
+    specialized_field = models.CharField(blank=False, null=False)
+    patient_type = models.CharField(choices=AGE_GROUP_CHOICES, null=False, blank=False)
     meet = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='meets', blank=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='created_at')
 
@@ -149,3 +172,18 @@ def save_profile(sender, instance,  **kwargs):
             instance.profile.save()
     
 
+@receiver(post_save, sender=APIUser)
+def create_api_auth_token(sender, instance, created=False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)
+
+
+@receiver(post_save, sender=APIUser)
+def create_api_profile(sender, instance, created=False, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+
+
+@receiver(post_save, sender=APIUser)
+def save_api_profile(sender, instance,  **kwargs):
+    instance.profile.save()
