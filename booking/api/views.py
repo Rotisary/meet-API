@@ -17,7 +17,7 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 
 from booking.models import Complaint, Appointment, Symptom
 from users.models import Profile, User
-from booking.api.serializers import ComplaintSerializer, AppointmentSerializer
+from booking.api.serializers import ComplaintSerializer, AppointmentSerializer, SymptomSerializer
 from users.api.serializers import ProfileSerializer
 from booking.api.custom_permissions import (
     UserIsDoctor, 
@@ -38,6 +38,14 @@ def api_root(request):
     })
 
 
+class SymptomsList(ListAPIView):
+    authentication_classes = ([TokenAuthentication, ])
+    permission_classes = ([IsAuthenticated, ])
+    renderer_classes = ([JSONRenderer, BrowsableAPIRenderer])
+    serializer_class = SymptomSerializer
+    queryset = Symptom.objects.all()
+
+
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, UserIsPatient])
 @parser_classes([JSONParser, MultiPartParser])
@@ -46,27 +54,30 @@ def api_create_complaint_view(request):
     if request.method == 'POST':
         serializer = ComplaintSerializer(data=request.data, context={'request': request})
         symptoms = request.query_params.get('symptoms')
-        splited_symptoms = symptoms.split('_')
-        symptoms_list = []
-        for item in splited_symptoms:
-            symptoms_list.append(int(item))
+        if not symptoms:
+            return Response(data={'error': 'please add symptoms to query_parameter'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            splited_symptoms = symptoms.split('_')
+            symptoms_list = []
+            for item in splited_symptoms:
+                symptoms_list.append(int(item))
 
-        if serializer.is_valid(raise_exception=True):
-            new_complaint = serializer.save(patient=request.user)
-            try:
-                complaint = Complaint.objects.get(id=new_complaint.id)
-                for symptom in symptoms_list:
-                    try:
-                        model_symptom = Symptom.objects.get(ID=symptom)
-                        complaint.symptoms.add(model_symptom)
-                    except Symptom.DoesNotExist:
-                        raise NotFound(detail="sorry, couldn't process your symptom. Please use different keywords")
-                complaint.save()
-            except Complaint.DoesNotExist:
-                raise NotFound(detail='the complaint was not found')
-            
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            if serializer.is_valid(raise_exception=True):
+                new_complaint = serializer.save(patient=request.user)
+                try:
+                    complaint = Complaint.objects.get(id=new_complaint.id)
+                    for symptom in symptoms_list:
+                        try:
+                            model_symptom = Symptom.objects.get(ID=symptom)
+                            complaint.symptoms.add(model_symptom)
+                        except Symptom.DoesNotExist:
+                            raise NotFound(detail="sorry, couldn't process your symptom. Please use different keywords")
+                    complaint.save()
+                except Complaint.DoesNotExist:
+                    raise NotFound(detail='the complaint was not found')
+                
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         
 @api_view(['PUT', ])
@@ -82,12 +93,33 @@ def api_update_complaint_view(request, pk):
         
         if request.method == 'PUT':
             serializer = ComplaintSerializer(complaint, data=request.data, partial=True)
+            symptoms = request.query_params.get('symptoms')
             data = {}
-            if serializer.is_valid(raise_exception=True):
-                serializer.save()
-                data['success'] = 'update successful'
-                return Response(data=data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            if not symptoms:
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                    data['success'] = 'update successful'
+                    return Response(data=data, status=status.HTTP_200_OK)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                splited_symptoms = symptoms.split('_')
+                symptoms_list = []
+                for item in splited_symptoms:
+                    symptoms_list.append(int(item))
+    
+                for symptom in symptoms_list:
+                    try:
+                        model_symptom = Symptom.objects.get(ID=symptom)
+                        complaint.symptoms.add(model_symptom)
+                    except Symptom.DoesNotExist:
+                        raise NotFound(detail="sorry, couldn't process your symptom. Please use different keywords")
+                    
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                    complaint.save()
+                    data['success'] = 'update successful'
+                    return Response(data=data, status=status.HTTP_200_OK)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Complaint.DoesNotExist:
          raise NotFound(detail='this complaint does not exist')
     
@@ -138,7 +170,7 @@ class api_complaint_list_view(ListAPIView):
     permission_classes = (IsAuthenticated, UserIsDoctor, DoctorsComplaintPerm)
     renderer_classes = (JSONRenderer, BrowsableAPIRenderer)
     filter_backends = ([SearchFilter, OrderingFilter])
-    search_fields = ['body_part', 'patient__first_name', 'patient__last_name']
+    search_fields = ['symptoms__Name','age_group', 'patient__first_name', 'patient__last_name']
     ordering = ['-created_at']
 
     def get_queryset(self):
@@ -198,22 +230,28 @@ def api_related_doctors_list_view(request, pk):
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, UserIsPatient])
 def api_add_to_doctors_meet_view(request, username, pk):
-    doctor = Profile.objects.get(user__username=username)
-    patient = request.user
-    complaint = Complaint.objects.get(id=pk)
-    data = {}
-    if doctor.meet.filter(id=patient.id):
-        doctor.meet.remove(patient)
-        data['message'] = "you have removed yourself from this doctor's meet"
-    else:
-        if doctor.number_of_meet() < 3:
-            doctor.meet.add(patient)
-            complaint.treated_by = doctor.user
-            complaint.save()
-            data['message'] = "you have succesfully added yourself to this doctor's meet"
-        else:
-            data['message'] = "this doctor already has three meets, please find another qualified doctor"
-    return Response(data=data, status=status.HTTP_200_OK)
+    try:
+        doctor = Profile.objects.get(user__username=username)
+        patient = request.user
+        try:
+            complaint = Complaint.objects.get(id=pk)
+            data = {}
+            if doctor.meets.filter(id=patient.id):
+                doctor.meets.remove(patient)
+                data['message'] = "you have removed yourself from this doctor's meet"
+            else:
+                if doctor.number_of_meet() < 3:
+                    doctor.meets.add(patient)
+                    complaint.treated_by = doctor.user
+                    complaint.save()
+                    data['message'] = "you have succesfully added yourself to this doctor's meet"
+                else:
+                    data['message'] = "this doctor already has three meets, please find another qualified doctor"
+            return Response(data=data, status=status.HTTP_200_OK)
+        except Complaint.DoesNotExist:
+            raise NotFound(detail='this complaint does not exist')
+    except Profile.DoesNotExist:
+        raise NotFound(detail='this profile does not exist')
 
 
 @api_view(['POST', ])

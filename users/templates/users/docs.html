@@ -1,0 +1,1071 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docs</title>
+    <link rel="stylesheet" href="{% static 'users/main.css' %}">
+    <script src="https://kit.fontawesome.com/682f18e2b6.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    {% block content %}
+        <div class="container">
+            <div class="nav">
+                <h2>Overview</h2>
+                <ul style="padding: 5px;">
+                    <li><a href="#introduction">Introduction</a></li>
+                    <li><a href="#create-account">Create Account</a></li>
+                    <ul>
+                        <li><a href="#test-account">Create account to test API</a></li>
+                        <li><a href="#api-account">Create account to integrate with API</a></li>
+                    </ul>
+                    <li><a href="#endpoints">Endpoints</a></li>
+                    <ul>
+                        <li><a href="#complaint-endpoints">Complaint Endpoints</a></li>
+                        <li><a href="#appointment-endpoints">Appointment Endpoints</a></li>
+                        <li><a href="#user-management-endpoints">User Management Endpoints</a></li>
+                        <li><a href="#review-endpoints">Review Endpoints</a></li>
+                    </ul>
+                </ul>
+            </div>
+            <div class="content">
+                <h2>Welcome to Meet!</h2>
+                <div class="section" id="introduction">
+                    <h4>Introduction</h4>
+                    <div class="section-body">
+                        <p>
+                            <span>What does Meet API do?</span> - Meet is an online medical consultation API. What that means is that it allows users to sign up as patients or doctors. If they sign up as patients, they can create a complaint(a complaint is basically a set of symptoms), possible issues get suggested based on the symptoms in the complaint and then get a list of doctors that specialize in providing treatment in that field. The doctors are rated based on reviews and ratings from patients they have had consultations with in the past, the patients can then pick their doctor of choice based on those ratings and availability. After picking a doctor, the doctor schedules appointments with the patient for further discussions and consultation.
+                        </p>
+                        <p>
+                            <span>Who can use Meet API?</span> – Meet API is available to individuals seeking to test the functionality of the API. It is also available to developers who wants to integrate with the API (Frontend and Backend developers)
+                        </p>  
+                        <p>
+                            Now that we know what the Meet API can do and who can use the API, let’s dive right into the requirements and steps to follow in order to use the API!
+                        </p>
+                    </div>
+                </div>
+                <div class="section" id="create-account">
+                    <h4>Create Account</h4>
+                    <div class="section-body">
+                        <p>
+                            What you need to do before you can use the Meet API is create an account. Creating an account automatically generates a token for you which is needed to authorize all requests that you will be making to the API endpoints
+                        </p>
+                        <ul>
+                            <li>
+                                <div class="sub-section" id="test-account">
+                                    <h5>create account to test the API</h5>
+                                    <p>
+                                        If you are willing to interact with the Meet API just to test its functionality, you can only do so by making calls to its endpoints using a service like Postman or using language libraries like Python Requests, JavaScript JQuery e.t.c. This is so because Meet is just an API and for that reason it doesn’t have an interface that allows users to interact with it directly from the frontend.
+                                    </p>
+                                    <p>*Note: request examples in this documentation are made using python requests library</p>
+                                    <h5>To create an account;</h5>
+                                    The fields required are:
+                                    <ul>
+                                        <li class="field-list">email(required)</li>
+                                        <li class="field-list">first_name(required)</li>
+                                        <li class="field-list">last_name(required)</li>
+                                        <li class="field-list">username(required)</li>
+                                        <li class="field-list">password(required)</li>
+                                        <li class="field-list">password2(required) - it must match password 1</li>
+                                        <li class="field-list">category(required) – you can sign up either as a patient or a doctor</li>
+                                        <li class="field-list">phone_number(not required)</li>
+                                    </ul>
+                                
+                                    <p>make a POST request to : <h3>http://127.0.0.1:8000/api/users/register/</h3></p>
+                                    <h4>Sample request</h4>
+                                    <div class="snippet-box">
+                                        body = {
+                                            <div style="padding-left: 3rem;">
+                                                <br>'email': 'test@gmail.com',
+                                                <br>'first_name': 'test',
+                                                <br>'last_name': 'user',
+                                                <br>'username': 'tester',
+                                                <br>'password': 'testuserpassword',
+                                                <br>'password2': 'testuserpassword',
+                                                <br>'category': 'PT' (PT for patient),
+                                                <br>'phone_number': 'testusernumber'(do not use country code;enter the number as a string)
+                                            </div>
+                                        <br>}
+                                        <br>headers = {
+                                            <div style="padding-left: 3rem;">
+                                                <br>'Content-Type': 'application/json'
+                                            </div>
+                                        <br>}
+                                        <br>url = 'http://127.0.0.1:8000/api/users/register/'
+                                        <br>request = requests.post(url, headers=headers, json=body)
+                                        <br>response_data = request.json()
+                                    </div>
+                                    <h4>Sample response</h4>
+                                    <div class="snippet-box">
+                                        <p>
+                                            {
+                                            <div style="padding-left: 3rem;">
+                                                <br>'respone': 'successfully registered user', 
+                                                <br>'email': 'test@gmail.com', 
+                                                <br>'username': 'tester', 
+                                                <br>'category': 'PT', 
+                                                <br>'first_name': 'test', 
+                                                <br>'last_name': 'user', 
+                                                <br>'phone_number': 'testusernumber, 
+                                                <br>'token': 'your generated token'
+                                            </div>
+                                            <br>}
+                                        </p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="sub-section" id="api-account">
+                                    <h5>create account to integrate with the API</h5>
+                                    <p>To create an account to integrate with the API, the required fields are:</p>
+                                    <ul>
+                                        <li class="field-list">email(required)</li>
+                                        <li class="field-list">first_name(required)</li>
+                                        <li class="field-list">last_name(required)</li>
+                                        <li class="field-list">username(required)</li>
+                                        <li class="field-list">password(required)</li>
+                                        <li class="field-list">password2(required) - it must match password 1</li>
+                                        <li class="field-list">phone_number(not required)</li>
+                                    </ul>
+                                    <p>
+                                        After entering values for the fields above, make a POST request to: <h3>http://127.0.0.1:8000/api/users/register/apiuser/</h3>
+                                    </p>
+                                    <h4>Sample request</h4>
+                                    <div class="snippet-box">
+                                        body = {
+                                            <div style="padding-left: 3rem;">
+                                                <br>"email": "apiuser@gmail.com",
+                                                <br>"first_name": "api",
+                                                <br>"last_name": "user",
+                                                <br>"username": "apitester",
+                                                <br>"password": "apiuserpassword",
+                                                <br>"password2": "apiuserpassword",
+                                                <br>"phone_number": "apiusernumber"(do not use country code;enter the number as a string)
+                                            </div>
+                                        <br>}
+                                        <br>headers = {
+                                            <div style="padding-left: 3rem;">
+                                                <br>'Content-Type': 'application/json'
+                                            </div>
+                                        <br>}
+                                        <br>url = 'http://127.0.0.1:8000/api/users/register/apiuser/'
+                                        <br>request = requests.post(url, headers=headers, json=body)
+                                        <br>response_data = request.json()
+                                    </div>
+                                    <h4>Sample response</h4>
+                                    <div class="snippet-box">
+                                        <p>
+                                            {
+                                            <div style="padding-left: 3rem;">
+                                                <br>"response": "account created",
+                                                <br>"token": "your generated token"
+                                            </div>
+                                        <br>}
+                                        </p>
+                                    </div>
+                                </div>                        
+                            </li>
+                        </ul>
+                        <p>
+                            After you have created an account following the steps above for both category of users, copy the token generated for you as it is going to be needed to authorize the API calls you would be making to this API’s endpoints
+                        </p>
+                        <p>
+                            *You would see why there are two different endpoints for user creation later in the documentation
+                        </p>
+                    </div>    
+                </div>
+                <div class="section" id="endpoints">
+                    <h4>Endpoints</h4>
+                    <div class="section-body">
+                        <ul>
+                            <li>
+                                <div class="sub-section" id="complaint-endpoints">
+                                    <h5>Complaint endpoints</h5>
+                                    <ul>
+                                        <li>
+                                            <h6>Complaint CRUD endpoints</h6>
+                                            <ul>
+                                                <li>
+                                                    <p>Create: 
+                                                        <br>The fields required are
+                                                    </p>
+                                                    <ul>
+                                                        <li class="field-list">sex(required) - Choice field and can either be 'male' or 'female' </li>
+                                                        <li class="field-list">year_of_birth(required) - 4 digits and It must be a year lesser than the current year</li>
+                                                        <li class="field-list">age_group(required) - Choice field: preteen(PT), teenager(TN), adult(AD), old adult(OAD)</li>
+                                                        <p>make sure that the abbreviations are what you enter for the age_group field</p>
+                                                    </ul>
+                                                    <p>To add symptoms, add a query parameter called 'symptoms' to your url and populate it with IDs of the symptoms you want to add in the format shown below</p>
+                                                    <p>
+                                                        After entering values for the fields, make a POST request to: <h3>http://127.0.0.1:8000/api/booking/complaint/create?symptoms=ID1_ID2_ID3</h3>
+                                                    </p>
+                                                    <h4>Sample request</h4>
+                                                    <div class="snippet-box">
+                                                        body = {
+                                                            <div style="padding-left: 3rem;">
+                                                                <br>'sex': 'male',
+                                                                <br>'year_of_birth': 2003,
+                                                                <br>'age_group': 'AD',
+                                                            </div>
+                                                        <br>}
+                                                        <br>headers = {
+                                                            <div style="padding-left: 3rem;">
+                                                                <br>'Authorization': 'Token {your generated token}',
+                                                                <br>'Content-Type': 'application/json'
+                                                            </div>
+                                                        <br>}
+                                                        <br>url = 'http://127.0.0.1:8000/api/booking/complaint/create/'
+                                                        <br>query_params = {
+                                                            <div style="padding-left: 3rem;">
+                                                                <br>'symptoms': '68_66'
+                                                            </div>
+                                                        <br>}
+                                                        <br>request = requests.post(url, params=query_params, headers=headers, json=body)
+                                                        <br>response_data = request.json()
+                                                    </div>
+                                                    <h4>Sample response</h4>
+                                                    <div class="snippet-box">
+                                                        <p>
+                                                            {
+                                                            <div style="padding-left: 3rem;">
+                                                                <br>"url": "http://127.0.0.1:8000/api/booking/complaint/11/",
+                                                                <br>"id": 11
+                                                                <br>"symptoms": [
+                                                                <div style="padding-left: 3rem;">
+                                                                    <br>"Vision impairment",
+                                                                    <br>"Visual field loss"
+                                                                </div>
+                                                                <br>],
+                                                                <br>"sex": "male",
+                                                                <br>"year_of_birth": 2003,
+                                                                <br>"age_group": "AD",
+                                                                <br>"patient": "http://127.0.0.1:8000/api/users/details/tester/",
+                                                                <br>"treated_by": null
+                                                            </div>
+                                                            <br>}
+                                                        </p>
+                                                    </div>
+                                                    <p>
+                                                        * To get the list of symptoms make  a GET request to: <h3>http://127.0.0.1:8000/api/booking/symptoms/list</h3>
+                                                    </p>
+                                                </li>
+                                                <li>
+                                                    <p>Read: </p>
+                                                        <p>*Make a GET request to: <h3>http://127.0.0.1:8000/api/booking/complaint/{complaint id}/</h3></p>
+                                                        <h4>Sample request</h4>
+                                                        <div class="snippet-box">
+                                                            <br>headers = {
+                                                                <div style="padding-left: 3rem;">
+                                                                    <br>'Authorization': 'Token {your generated token}',
+                                                                </div>
+                                                            <br>}
+                                                            <br>url = 'http://127.0.0.1:8000/api/booking/complaint/11/'
+                                                            <br>request = requests.get(url, headers=headers)
+                                                            <br>response_data = request.json()
+                                                        </div>
+                                                        <h4>Sample response</h4>
+                                                        <div class="snippet-box">
+                                                            <p>
+                                                                {
+                                                                <div style="padding-left: 3rem;">
+                                                                    <br>"url": "http://127.0.0.1:8000/api/booking/complaint/11/",
+                                                                    <br>"id": 11
+                                                                    <br>"symptoms": [
+                                                                    <div style="padding-left: 3rem;">
+                                                                        <br>"Vision impairment",
+                                                                        <br>"Visual field loss"
+                                                                    </div>
+                                                                    <br>],
+                                                                    <br>"sex": "male",
+                                                                    <br>"year_of_birth": 2003,
+                                                                    <br>"age_group": "AD",
+                                                                    <br>"patient": "http://127.0.0.1:8000/api/users/details/tester/",
+                                                                    <br>"treated_by": null
+                                                                </div>
+                                                            <br>}
+                                                            </p>
+                                                        </div>  
+                                                </li>
+                                                <li>
+                                                    <p>Update: </p>
+                                                    <p>
+                                                        *Enter values for the field(s) you want to update and make a PUT request to: <h3>http://127.0.0.1:8000/api/booking/complaint/{complaint id}/update/</h3>
+                                                    </p>
+                                                    <p>
+                                                        *To update symptoms, add a symptoms query parameter to the url as you would if you were creating a new complaint
+                                                    </p>
+                                                    <h4>Sample request</h4>
+                                                    <div class="snippet-box">
+                                                        <br>headers = {
+                                                            <div style="padding-left: 3rem;">
+                                                                <br>'Authorization': 'Token {your generated token}',
+                                                                <br>'Content-Type': 'application/json'
+                                                            </div>
+                                                        <br>}
+                                                        <br>url = 'http://127.0.0.1:8000/api/booking/complaint/11/update/'
+                                                        <br>request = requests.put(url, headers=headers, json=body)
+                                                        <br>response_data = request.json()
+                                                    </div>
+                                                    <h4>Sample response</h4>
+                                                    <div class="snippet-box">
+                                                        <p>
+                                                            {
+                                                            <div style="padding-left: 3rem;">
+                                                                <br>"success": "update successful"
+                                                            </div>
+                                                        <br>}
+                                                        </p>
+                                                    </div>  
+                                                </li>
+                                                <li>
+                                                    <p>Delete: </p>
+                                                    <p>*Make a DELETE request to: <h3>http://127.0.0.1:8000/api/booking/complaint/{complaint id}/delete/</h3></p>
+                                                    <h4>Sample request</h4>
+                                                    <div class="snippet-box">
+                                                        <br>headers = {
+                                                            <div style="padding-left: 3rem;">
+                                                                <br>'Authorization': 'Token {your generated token}'
+                                                            </div>
+                                                        <br>}
+                                                        <br>url = 'http://127.0.0.1:8000/api/booking/complaint/11/delete/'
+                                                        <br>request = requests.delete(url, headers=headers)
+                                                        <br>response_data = request.json()
+                                                    </div>
+                                                    <h4>Sample response</h4>
+                                                    <div class="snippet-box">
+                                                        <p>
+                                                            {
+                                                            <div style="padding-left: 3rem;">
+                                                                <br>"success": "delete successful"
+                                                            </div>
+                                                        <br>}
+                                                        </p>
+                                                    </div>  
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li>
+                                            <h6>Complaint list endpoint</h6>
+                                            <p>
+                                                This is the endpoint that would be called if a user signed up as a doctor wants to see the list of complaints that he/she has treated.
+                                            </p>
+                                            <p>
+                                                Make GET request to: <h3>http://127.0.0.1:8000/api/booking/complaint/list/?username={doctor's username}</h3>
+                                            </p>
+                                            <h4>Sample request</h4>
+                                            <div class="snippet-box">
+                                                <br>headers = {
+                                                    <div style="padding-left: 3rem;">
+                                                        <br>'Authorization': 'Token {your generated token}'
+                                                    </div>
+                                                <br>}
+                                                <br>query_params = {
+                                                    <div style="padding-left: 3rem;">
+                                                        <br>'username': 'tester1'
+                                                    </div>
+                                                <br>}
+                                                <br>url = 'http://127.0.0.1:8000/api/booking/complaint/list/
+                                                <br>request = requests.get(url, params=query_params, headers=headers)
+                                                <br>response_data = request.json()
+                                            </div>
+                                            <h4>Sample response</h4>
+                                            <div class="snippet-box">
+                                                <p>
+                                                    {
+                                                    <div style="padding-left: 3rem">
+                                                        <br>"count": 1,
+                                                        <br>"next": null,
+                                                        <br>"previous": null,
+                                                        <br>"results": [
+                                                            <br>{
+                                                                <div style="padding-left: 3rem;">
+                                                                    <br>"url": "http://127.0.0.1:8000/api/booking/complaint/11/",
+                                                                    <br>"id": 11,
+                                                                    <br>"symptoms": [
+                                                                    <br>"Vision impairment",
+                                                                    <br>"Visual field loss"
+                                                                </div>
+                                                                <br>],
+                                                                <br>"sex": "male",
+                                                                <br>"year_of_birth": 2003,
+                                                                <br>"age_group": "AD",
+                                                                <br>"patient": "http://127.0.0.1:8000/api/users/details/tester/",
+                                                                <br>"treated_by": "http://127.0.0.1:8000/api/users/details/tester1/"
+                                                            <br>}
+                                                        <br>]
+                                                    </div>
+                                                <br>}
+                                                </p>
+                                            </div> 
+                                            <p>
+                                                *The list can be filtered by symptoms, age_group, patient’s first and last name
+                                                <p>
+                                                    To apply filters, add a query parameter with the name ‘search’ to the URL and set it to whatever you want to filter by
+                                                </p>
+                                            </p>
+                                            <p>
+                                                Example URL:  <h3>http://127.0.0.1:8000/api/booking/complaint/list?username={doctor's username}&search={name of symptom}</h3>
+                                            </p>
+                                            <h4>Sample request</h4>
+                                            <div class="snippet-box">
+                                                <br>headers = {
+                                                    <div style="padding-left: 3rem;">
+                                                        <br>'Authorization': 'Token {your generated token}'
+                                                    </div>
+                                                <br>}
+                                                <br>query_params = {
+                                                    <div style="padding-left: 3rem;">
+                                                        <br>'username': 'tester1',
+                                                        <br>'search': 'Vision impairment' (search by symptom)
+                                                    </div>
+                                                <br>}
+                                                <br>url = 'http://127.0.0.1:8000/api/booking/complaint/list/'
+                                                <br>request = requests.get(url, params=query_params, headers=headers)
+                                                <br>response_data = request.json()
+                                            </div>
+                                            <h4>Sample response</h4>
+                                            <div class="snippet-box">
+                                                <p>
+                                                    {
+                                                        <div style="padding-left: 3rem">
+                                                            <br>"count": 1,
+                                                            <br>"next": null,
+                                                            <br>"previous": null,
+                                                            <br>"results": [
+                                                                <br>{
+                                                                    <div style="padding-left: 3rem;">
+                                                                        <br>"url": "http://127.0.0.1:8000/api/booking/complaint/11/",
+                                                                        <br>"id": 11,
+                                                                        <br>"symptoms": [
+                                                                        <br>"Vision impairment",
+                                                                        <br>"Visual field loss"
+                                                                    </div>
+                                                                    <br>],
+                                                                    <br>"sex": "male",
+                                                                    <br>"year_of_birth": 2003,
+                                                                    <br>"age_group": "AD",
+                                                                    <br>"patient": "http://127.0.0.1:8000/api/users/details/tester/",
+                                                                    <br>"treated_by": "http://127.0.0.1:8000/api/users/details/tester1/"
+                                                                <br>}
+                                                            <br>]
+                                                        </div>
+                                                    <br>}
+                                                </p>
+                                            </div>  
+                                        </li>
+                                        <li>
+                                            <h6>Related doctors list endpoint</h6>
+                                            <p>
+                                                This endpoint gets called whenever a user creates a new complaint and it returns a list of doctors that specialize in treating any of the suggested issues.
+                                            </p>
+                                            <p>
+                                                *Make GET request to: <h3>http://127.0.0.1:8000/api/booking/complaint/{complaint id}/match/results/</h3>
+                                            </p>
+                                            <h4>Sample request</h4>
+                                            <div class="snippet-box">
+                                                <br>headers = {
+                                                    <div style="padding-left: 3rem;">
+                                                        <br>'Authorization': 'Token {your generated token}'
+                                                    </div>
+                                                <br>}
+                                                <br>url = 'http://127.0.0.1:8000/api/booking/complaint/11/match/results/'
+                                                <br>request = requests.get(url, headers=headers)
+                                                <br>response_data = request.json()
+                                            </div>
+                                            <h4>Sample response</h4>
+                                            <div class="snippet-box">
+                                                <p>
+                                                    {
+                                                    <div style="padding-left: 3rem;">
+                                                        "possible illness": [
+                                                        <div style="padding-left: 3rem;">
+                                                            <br>"Glaucoma",
+                                                            <br>"Retinal detachment",
+                                                            <br>"Cranial arteritis"
+                                                        </div>
+                                                        <br>],
+                                                        <br>"doctor suggestions": [
+                                                        <div style="padding-left: 3rem;">
+                                                            <br>{
+                                                                <div style="padding-left: 3rem;">
+                                                                    <br>"url": "http://127.0.0.1:8000/api/users/profile/7/",
+                                                                    <br>"id": 7,
+                                                                    <br>"user": "http://127.0.0.1:8000/api/users/details/practiseuser/",
+                                                                    <br>"specialization": "Ophthalmology",
+                                                                    <br>"patient_type": "AD",
+                                                                    <br>"meets": [],
+                                                                    <br>"appointments_booked": [],
+                                                                    <br>"reviews": [],
+                                                                    <br>"rating": 0.0
+                                                                </div>
+                                                            <br>}
+                                                        </div>
+                                                        <br>]
+                                                    </div>
+                                                <br>}
+                                                </p>
+                                            </div>  
+                                        </li>
+                                        <li>
+                                            <h6>Add doctor to meet endpoint</h6>
+                                            <p>
+                                                This is the endpoint that gets called whenever a patient decides to be added to a particular doctor's list of meets(a meet is a patient that has chosen a particular doctor for consultation. NOTE: a doctor can only be in three meets at a time)
+                                            </p>
+                                            <p>
+                                                *Make POST request to: <h3>http://127.0.0.1:8000/api/booking/meet/{doctor username}/{complaint id}/add/</h3>
+                                            </p>
+                                            <h4>Sample request</h4>
+                                            <div class="snippet-box">
+                                                <br>headers = {
+                                                    <div style="padding-left: 3rem;">
+                                                        <br>'Authorization': 'Token {your generated token}'
+                                                    </div>
+                                                <br>}
+                                                <br>url = 'http://127.0.0.1:8000/api/booking/meet/tester1/11/add/'
+                                                <br>request = requests.post(url, headers=headers)
+                                                <br>response_data = request.json()
+                                            </div>
+                                            <h4>Sample response</h4>
+                                            <div class="snippet-box">
+                                                <p>
+                                                    {
+                                                    <div style="padding-left: 3rem;">
+                                                        <br>"message": "you have succesfully added yourself to this doctor's meet"
+                                                    </div>
+                                                <br>}
+                                                </p>
+                                            </div>  
+                                        </li>
+                                        <p>
+                                            *Remember to add your token as a header when making requests to the endpoints*
+                                        </p>
+                                        <p>
+                                            *Please note that users signed up as doctors do not have permission to access the complaint endpoints
+                                        </p>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="sub-section" id="appointment-endpoints">
+                                    <h5>Appointment endpoints</h5>
+                                    <ul>
+                                        <li>
+                                            <h6>Appointment CRUD endpoints</h6>
+                                            <ul>
+                                                <li>
+                                                    <p>Create: </p>
+                                                    <p>*The required fields are: </p>
+                                                    <ul>
+                                                        <li class="field-list">date_of_appointment(required)</li>
+                                                        <li class="field-list">time_of_appointment(required)</li>
+                                                    </ul>
+                                                    <p>*Make a POST request to: <h3>http://127.0.0.1:8000/api/booking/appointment/create/{patient username}/</h3></p>
+                                                    <h4>Sample request</h4>
+                                                    <div class="snippet-box">
+                                                        body = {
+                                                            <div style="padding-left: 3rem;">
+                                                                <br>'date_of_appointment': '2024-09-23',
+                                                                <br>'first_name': '13:00:00',
+                                                            </div>
+                                                        <br>}
+                                                        <br>headers = {
+                                                            <div style="padding-left: 3rem;">
+                                                                <br>'Authorization': 'Token {your generated token}',
+                                                                <br>'Content-Type': 'application/json'
+                                                            </div>
+                                                        <br>}
+                                                        <br>url = 'http://127.0.0.1:8000/api/booking/appointment/create/tester'
+                                                        <br>request = requests.post(url, headers=headers, json=body)
+                                                        <br>response_data = request.json()
+                                                    </div>
+                                                    <h4>Sample response</h4>
+                                                    <div class="snippet-box">
+                                                        <p>
+                                                            {
+                                                            <div style="padding-left: 3rem;">
+                                                                <br>"url": "http://127.0.0.1:8000/api/booking/appointment/5/",
+                                                                <br>"id": 5,
+                                                                <br>"owner": "tester1's profile",
+                                                                <br>"patient": "http://127.0.0.1:8000/api/users/details/tester/",
+                                                                <br>"date_of_appointment": "2024-09-24",
+                                                                <br>"time_of_appointment": "12:00:00"
+                                                            </div>
+                                                        <br>}
+                                                        </p>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <p>Read: </p>
+                                                    <p>*Make a GET request to: <h3>http://127.0.0.1:8000/api/booking/appointment/{appointment id}/</h3></p>
+                                                    <h4>Sample request</h4>
+                                                    <div class="snippet-box">
+                                                        <br>headers = {
+                                                            <div style="padding-left: 3rem;">
+                                                                <br>'Authorization': 'Token {your generated token}'
+                                                            </div>
+                                                        <br>}
+                                                        <br>url = 'http://127.0.0.1:8000/api/booking/appointment/5/'
+                                                        <br>request = requests.get(url, headers=headers)
+                                                        <br>response_data = request.json()
+                                                    </div>
+                                                    <h4>Sample response</h4>
+                                                    <div class="snippet-box">
+                                                        <p>
+                                                            {
+                                                            <div style="padding-left: 3rem;">
+                                                                <br>"url": "http://127.0.0.1:8000/api/booking/appointment/5/",
+                                                                <br>"id": 5,
+                                                                <br>"owner": "tester1's profile",
+                                                                <br>"patient": "http://127.0.0.1:8000/api/users/details/tester/",
+                                                                <br>"date_of_appointment": "2024-09-24",
+                                                                <br>"time_of_appointment": "12:00:00"
+                                                            </div>
+                                                        <br>}
+                                                        </p>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <p>Update: </p>
+                                                    <p>
+                                                        *Enter values for the field(s) you want to change and make PUT request to: <h3>http://127.0.0.1:8000/api/booking/appointment/{appointment id}/update/</h3>
+                                                    </p>
+                                                    <h4>Sample request</h4>
+                                                    <div class="snippet-box">
+                                                        <br>headers = {
+                                                            <div style="padding-left: 3rem;">
+                                                                <br>'Authorization': 'your generated token',
+                                                                <br>'Content-Type': 'application/json'
+                                                            </div>
+                                                        <br>}
+                                                        <br>url = 'http://127.0.0.1:8000/api/booking/appointment/5/update/'
+                                                        <br>request = requests.put(url, headers=headers)
+                                                        <br>response_data = request.json()
+                                                    </div>
+                                                    <h4>Sample response</h4>
+                                                    <div class="snippet-box">
+                                                        <p>
+                                                            {
+                                                            <div style="padding-left: 3rem;">
+                                                                <br>'success': 'update successful'
+                                                            </div>
+                                                        <br>}
+                                                        </p>
+                                                    </div>
+                                                </li>
+                                                <p>*Appointments do not have a delete endpoint(They cannot be deleted)</p>
+                                            </ul>
+                                        </li> 
+                                    <p>*Users signed up as patients do not have permission to access the appointment endpoints</p>
+                                    <p>
+                                        This restriction based on user category is why a different endpoint has been made to create users that want to integrate with the API. Users created through this endpoint have access to all endpoints.
+                                    </p>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="sub-section" id="user-management-endpoints">
+                                    <h5>User management endpoints</h5>
+                                    <ul>
+                                        <li>
+                                            <h6>User CRUD endpoints</h6>
+                                            <p>
+                                                *The user creation endpoint has been covered in one of the sections above so we won’t go into that
+                                            </p>
+                                            <p>
+                                                When a user creates an account as a doctor or an account for integration, they get a profile that holds details about the field(s) they specialize in, the age group of patients they treat(Choice field: preteen(PT), teenager(TN), adult(AD), old adult(OAD)) as specified by them, the meets they have, their reviews and star rating.
+                                                <br>After creating your account, be sure to update your profile. You can update the following fields: 
+                                            </p>
+                                            <ul>
+                                                <li class="field-list">specialization </li>
+                                                <li class="field-list">patient_type(Choice field: preteen(PT), teenager(TN), adult(AD), old adult(OAD))</li>
+                                                <p>remember to enter the abbreviations and not the full words</p>
+                                            </ul>
+                                            <p>make a PUT request to: <h3>http://127.0.0.1:8000/api/users/profile/{doctor username}/update/</h3></p>
+                                            <h4>Sample request</h4>
+                                            <div class="snippet-box">
+                                                body = {
+                                                    <div style="padding-left: 3rem;">
+                                                        <br>'specialization': 'otolarynology',
+                                                        <br>'patient_type': 'AD',
+                                                    </div>
+                                                <br>}
+                                                <br>headers = {
+                                                    <div style="padding-left: 3rem;">
+                                                        <br>'Authorization': 'Token {your generated token}'
+                                                        <br>'Content-Type': 'application/json'
+                                                    </div>
+                                                <br>}
+                                                <br>url = 'http://127.0.0.1:8000/api/users/profile/tester1/update/'
+                                                <br>request = requests.put(url, headers=headers, json=body)
+                                                <br>response_data = request.json()
+                                            </div>
+                                            <h4>Sample response</h4>
+                                            <div class="snippet-box">
+                                                <p>
+                                                    {
+                                                        <br>'success': 'update successful'
+                                                    <br>}
+                                                </p>
+                                            </div>
+                                            <p>
+                                                *Note that if the two fields above are empty, your profile will not be recommended when a user makes a request for a doctor.
+                                            </p>
+                                            <li>
+                                                <p>*Read: </p>
+                                                <p>You can access your profile by making a GET request to: <h3>http://127.0.0.1:8000/api/users/profile/{doctor's username}/</h3></p>
+                                                <h4>Sample request</h4>
+                                                <div class="snippet-box">
+                                                    <br>headers = {
+                                                        <div style="padding-left: 3rem;">
+                                                            <br>'Authorization': 'Token {your generated token}'
+                                                        </div>
+                                                    <br>}
+                                                    <br>url = 'http://127.0.0.1:8000/api/users/profile/practiseuser/'
+                                                    <br>request = requests.get(url, headers=headers)
+                                                    <br>response_data = request.json()
+                                                </div>
+                                                <h4>Sample response</h4>
+                                                <div class="snippet-box">
+                                                    <p>
+                                                        {
+                                                        <div style="padding-left: 3rem;">
+                                                            <br>"url": "http://127.0.0.1:8000/api/users/profile/7/",
+                                                            <br>"id": 7,
+                                                            <br>"user": "http://127.0.0.1:8000/api/users/details/practiseuser/",
+                                                            <br>"specialization": "Ophthalmology",
+                                                            <br>"patient_type": "AD",
+                                                            <br>"meets": [],
+                                                            <br>"appointments_booked": [],
+                                                            <br>"reviews": [],
+                                                            <br>"rating": 0.0
+                                                        </div>
+                                                    <br>}
+                                                    </p>
+                                                </div>
+                                                <p>*patients do not have access to profile endpoints</p>
+                                                <p>All users can access their user details by making a GET request to: <h3>http://127.0.0.1:8000/api/users/details/{user's username}/</h3></p>
+                                                <h4>Sample request</h4>
+                                                <div class="snippet-box">
+                                                    headers = {
+                                                        <div style="padding-left: 3rem;">
+                                                            <br>'Authorization': 'Token {your generated token}'
+                                                        </div>
+                                                    <br>}
+                                                    <br>url = 'http://127.0.0.1:8000/api/users/details/tester/'
+                                                    <br>request = requests.get(url, headers=headers)
+                                                    <br>response_data = request.json()
+                                                </div>
+                                                <h4>Sample response</h4>
+                                                <div class="snippet-box">
+                                                    <p>
+                                                        {
+                                                        <div style="padding-left: 3rem;">
+                                                            <br>"url": "http://127.0.0.1:8000/api/users/details/tester/",
+                                                            <br>"id": 8,
+                                                            <br>"email": "test@gmail.com",
+                                                            <br>"username": "tester",
+                                                            <br>"category": "PT",
+                                                            <br>"first_name": "test",
+                                                            <br>"last_name": "user",
+                                                            <br>"phone_number": "09011345681",
+                                                            <br>"complaints": [
+                                                                <div style="padding-left: 3rem;">
+                                                                    <br>"http://127.0.0.1:8000/api/booking/complaint/11/"
+                                                                </div>
+                                                            <br>],
+                                                            <br>"meets_in": [
+                                                                <div style="padding-left: 3rem;">
+                                                                    <br>"http://127.0.0.1:8000/api/users/profile/1/"
+                                                                </div>
+                                                            <br>],
+                                                            <br>"appointments_in": [
+                                                                <div style="padding-left: 3rem;">
+                                                                    "http://127.0.0.1:8000/api/booking/appointment/5/"
+                                                                </div>
+                                                            <br>]
+                                                        </div>  
+                                                    <br>}
+                                                    </p>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <p>Update: </p>
+                                                    <p>
+                                                        *All users can update their user details(name, username e.t.c …). To do this:
+                                                    </p>
+                                                    <p>
+                                                        Enter the field(s) you want to update and make a PUT request to: <h3>http://127.0.0.1:8000/api/users/details/{user's username}/update/</h3>
+                                                    </p>
+                                                    <p>*Note that the category field cannot be updated and there is a separate endpoint for password update</p>
+                                                    <p>(it is the same process for integration accounts)</p>
+                                                    <h4>Sample request</h4>
+                                                    <div class="snippet-box">
+                                                        <br>headers = {
+                                                            <div style="padding-left: 3rem;">
+                                                                <br>'Authorization': 'Token {your generated token}',
+                                                                <br>'Content-Type': 'application/json'
+                                                            </div>
+                                                        <br>}
+                                                        <br>url = 'http://127.0.0.1:8000/api/users/details/tester/update/'
+                                                        <br>request = requests.put(url, headers=headers, json=body)
+                                                        <br>response_data = request.json()
+                                                    </div>
+                                                    <h4>Sample response</h4>
+                                                    <div class="snippet-box">
+                                                        <p>
+                                                            {
+                                                                <br>'success': 'update successful'
+                                                            <br>}
+                                                        </p>
+                                                    </div>
+                                            </li>
+                                        </li>
+                                        <li>
+                                            <h6>login and password change endpoints</h6>
+                                            <ul>
+                                                <p>The fields required to login are: </p>
+                                                <ul>
+                                                    <li class="field-list">email</li>
+                                                    <li class="field-list">password</li>
+                                                </ul>
+                                                <p>After entering values for the fields, make a POST request to: <h3>http://127.0.0.1:8000/api/users/login/</h3></p>
+                                                <p>After making the POST request, the user is authenticated and you get result like the one below: </p>
+                                                <h4>Sample request</h4>
+                                                <div class="snippet-box">
+                                                    body = {
+                                                        <div style="padding-left: 3rem;">
+                                                            <br>'email': 'test@gmail.com',
+                                                            <br>'password': 'testuserpassword',
+                                                        </div>
+                                                    <br>}
+                                                    <br>headers = {
+                                                        <div style="padding-left: 3rem;">
+                                                            <br>'Content-Type': 'application/json'
+                                                        </div>
+                                                    <br>}
+                                                    <br>url = 'http://127.0.0.1:8000/api/users/login/'
+                                                    <br>request = requests.post(url, headers=headers, json=body)
+                                                    <br>response_data = request.json()
+                                                </div>
+                                                <h4>Sample response</h4>
+                                                <div class="snippet-box">
+                                                    <p>
+                                                        {
+                                                        <div style="padding-left: 3rem;">
+                                                            <br>"response": "Successfully Authenticated",
+                                                            <br>"pk": 8,
+                                                            <br>"email": "test@gmail.com",
+                                                            <br>"token": "your token"
+                                                        </div>
+                                                    <br>}
+                                                    </p>
+                                                </div>
+                                                <p>To change your password, enter the following fields: </p>
+                                                <ul>
+                                                    <li class="field-list">old_password(required)</li>
+                                                    <li class="field-list">password(new password)</li>
+                                                    <li class="field-list">confirm_password – the password and confirm password must match</li>
+                                                </ul>
+                                                <p>make a PUT request to: <h3>http://127.0.0.1:8000/api/users/change-password/</h3></p>
+                                                <h4>Sample request</h4>
+                                                <div class="snippet-box">
+                                                    body = {
+                                                        <div style="padding-left: 3rem;">
+                                                            <br>'old_password': 'testuserpassword',
+                                                            <br>'password': 'testusernewpassword',
+                                                            <br>'confirm_password': 'testusernewpassword',
+                                                        </div>
+                                                    <br>}
+                                                    <br>headers = {
+                                                        <div style="padding-left: 3rem;">
+                                                            <br>'Authorization': 'Token {your generated token}'
+                                                            <br>'Content-Type': 'application/json'
+                                                        </div>
+                                                    <br>}
+                                                    <br>url = 'http://127.0.0.1:8000/api/users/change-password/'
+                                                    <br>request = requests.put(url, headers=headers, json=body)
+                                                    <br>response_data = request.json()
+                                                </div>
+                                                <h4>Sample response</h4>
+                                                <div class="snippet-box">
+                                                    <p>
+                                                        {
+                                                        <div style="padding-left: 3rem;">
+                                                            <br>"password": "password changed successfully!"
+                                                        </div>
+                                                    <br>}
+                                                    </p>
+                                                </div>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="sub-section" id="review-endpoints">
+                                    <h5>Review endpoints</h5>
+                                    <ul>
+                                        <li>
+                                            <h6>CRUD endpoints </h6>
+                                            <ul>
+                                                <li>
+                                                    <p>Create: </p>
+                                                    <p>Enter the fields below: </p>
+                                                    <ul>
+                                                        <li>body(required)</li>
+                                                        <li>stars(required) – an integer representing the number of stars</li>
+                                                    </ul>
+                                                    <p>
+                                                        Make a POST request to: <h3>http://127.0.0.1:8000/api/users/review/{doctor's username}/create/</h3>
+                                                    </p>
+                                                    <h4>Sample request</h4>
+                                                    <div class="snippet-box">
+                                                        body = {
+                                                            <div style="padding-left: 3rem;">
+                                                                <br>'body': 'this is a review',
+                                                                <br>'stars': 3,
+                                                            </div>
+                                                        <br>}
+                                                        <br>headers = {
+                                                            <div style="padding-left: 3rem;">
+                                                                <br>'Authorization': 'Token {your generated token}',
+                                                                <br>'Content-Type': 'application/json'
+                                                            </div>
+                                                        <br>}
+                                                        <br>url = 'http://127.0.0.1:8000/api/users/reveiws/tester1/create/'
+                                                        <br>request = requests.post(url, headers=headers, json=body)
+                                                        <br>response_data = request.json()
+                                                    </div>
+                                                    <h4>Sample response</h4>
+                                                    <div class="snippet-box">
+                                                        <p>
+                                                            {
+                                                            <div style="padding-left: 3rem;">
+                                                                <br>"writer": "tester",
+                                                                <br>"id": 3,
+                                                                <br>"doctor": "tester1's profile",
+                                                                <br>"body": "this is a test reiew",
+                                                                <br>"stars": 3
+                                                            </div>
+                                                        <br>}
+                                                        </p>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <p>Read: </p>
+                                                    <p>*Make a GET request to: <h3>http://127.0.0.1:8000/api/users/review/{review id}/</h3> </p>
+                                                    <h4>Sample request</h4>
+                                                    <h4>Sample request</h4>
+                                                    <div class="snippet-box">
+                                                        <br>headers = {
+                                                            <div style="padding-left: 3rem;">
+                                                                <br>'Authorization': 'Token {your generated token}'
+                                                            </div>
+                                                        <br>}
+                                                        <br>url = 'http://127.0.0.1:8000/api/users/reveiw/3/'
+                                                        <br>request = requests.get(url, headers=headers)
+                                                        <br>response_data = request.json()
+                                                    </div>
+                                                    <h4>Sample response</h4>
+                                                    <div class="snippet-box">
+                                                        <p>
+                                                            {
+                                                            <div style="padding-left: 3rem;">
+                                                                <br>"writer": "tester",
+                                                                <br>"id": 3,
+                                                                <br>"doctor": "tester1's profile",
+                                                                <br>"body": "this is a test reiew",
+                                                                <br>"stars": 3
+                                                            </div>
+                                                        <br>}
+                                                        </p>
+                                                    </div>                                           
+                                                <p>*Reviews cannot be updated</p>
+                                                <li>
+                                                    <p>Delete: </p>
+                                                    <p>*Make DELETE request to: <h3>http://127.0.0.1:8000/api/users/review/{review id}/delete/</h3></p>
+                                                    <h4>Sample request</h4>
+                                                    <div class="snippet-box">
+                                                        <br>headers = {
+                                                            <div style="padding-left: 3rem;">
+                                                                <br>'Authorization': 'your generated token'
+                                                            </div>
+                                                        <br>}
+                                                        <br>url = 'http://127.0.0.1:8000/api/users/review/3/delete/'
+                                                        <br>request = requests.delete(url, headers=headers)
+                                                        <br>response_data = request.json()
+                                                    </div>
+                                                    <h4>Sample response</h4>
+                                                    <div class="snippet-box">
+                                                        <p>
+                                                            {
+                                                                <br>'success': 'delete successful'
+                                                            <br>}
+                                                        </p>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li>
+                                            <p>List endpoint: </p>
+                                                <p>
+                                                    This is the endpoint that users call to get a list of reviews specific to a particular doctor
+                                                </p>
+                                                <p>*Make GET request to: <h3>http://127.0.0.1:8000/api/users/reviews/{doctor's username}/list/</h3></p>
+                                                <h4>Sample request</h4>
+                                                <div class="snippet-box">
+                                                    <br>headers = {
+                                                        <div style="padding-left: 3rem;">
+                                                            <br>'Authorization': 'Token {your generated token}'
+                                                        </div>
+                                                    <br>}
+                                                    <br>url = 'http://127.0.0.1:8000/api/users/reveiws/tester1/list/'
+                                                    <br>request = requests.get(url, headers=headers)
+                                                    <br>response_data = request.json()
+                                                </div>
+                                                <h4>Sample response</h4>
+                                                <div class="snippet-box">
+                                                    <p>
+                                                        {
+                                                        <div style="padding-left: 3rem;">
+                                                            <br>"count": 2,
+                                                            <br>"next": null,
+                                                            <br>"previous": null,
+                                                            <br>"results": [
+                                                                <div style="padding-left: 3rem;">
+                                                                    <br>{
+                                                                        <div style="padding-left: 3rem;">
+                                                                            <br>"writer": "Roti",
+                                                                            <br>"id": 1,
+                                                                            <br>"doctor": "tester1's profile",
+                                                                            <br>"body": "he does not know how to communicate well with his patients",
+                                                                            <br>"stars": 2
+                                                                        </div>
+                                                                    <br>},
+                                                                    <br>{
+                                                                        <div style="padding-left: 3rem;">
+                                                                            <br>"writer": "tester",
+                                                                            <br>"id": 3,
+                                                                            <br>"doctor": "tester1's profile",
+                                                                            <br>"body": "this is a test reiew",
+                                                                            <br>"stars": 3
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            ]
+                                                        </div>
+                                                    <br>}
+                                                    </p>
+                                                </div>
+                                        </li>
+                                    </ul>
+                                    <p>*Please note; doctors do not have access to review endpoints</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+</body>

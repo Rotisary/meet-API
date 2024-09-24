@@ -2,9 +2,11 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.schemas import get_schema_view
 from users.api.utils import CustomSchemaGenerator
+from users.views import docs_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', docs_view, name='docs'),
     # REST FRAMEWORK URLS
     path('api/booking/', include('booking.api.urls')),
     path('api/users/', include('users.api.urls')),

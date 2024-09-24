@@ -71,9 +71,9 @@ class ObtainAuthTokenView(APIView):
     
 
     def post(self, request):
-        context = {}
+        data = {}
 
-        email = request.POST.get('username')
+        email = request.POST.get('email')
         password = request.POST.get('password')
         account = authenticate(email=email, password=password)
 
@@ -84,15 +84,17 @@ class ObtainAuthTokenView(APIView):
                 create_token = Token.objects.create(user=account)
                 token = create_token.key
 
-            context['response'] = 'Successfully Authenticated'
-            context['pk'] = account.pk
-            context['email'] = email
-            context['token'] = token
+            data['response'] = 'Successfully Authenticated'
+            data['pk'] = account.pk
+            data['email'] = email
+            data['token'] = token
+            status_code = status.HTTP_200_OK
         else:
-            context['response'] = 'error'
-            context['error_message'] = 'Invalid credentials'
+            data['response'] = 'error'
+            data['error_message'] = 'Invalid credentials'
+            status_code = status.HTTP_400_BAD_REQUEST
         
-        return Response(context)
+        return Response(data=data, status=status_code)
 
 
 @api_view(['GET', ])
@@ -226,7 +228,7 @@ def api_create_review_view(request, username):
     try:
         profile = Profile.objects.get(user__username=username, user__category='DR')
     
-        if request.user not in profile.meet.all():
+        if request.user not in profile.meets.all():
             raise PermissionDenied
         else:
             if request.method == 'POST':
@@ -283,10 +285,10 @@ def api_delete_review_view(request, pk):
 @permission_classes([IsAuthenticated,  UserIsPatient])
 @renderer_classes([JSONRenderer, BrowsableAPIRenderer])
 def api_review_list_view(request, username):
-    reviews = DoctorReview.objects.filter(doctor__user__username=username)
+    reviews = DoctorReview.objects.filter(doctor__user__username=username).order_by('-created_at')
 
     if request.method == 'GET':
         paginator_class = CustomPagination()
         queryset = paginator_class.paginate_queryset(reviews, request, None)
         serializer = ReviewSerializer(queryset,  many=True, context={'request': request})
-        return paginator_class.get_paginated_response(data=serializer.data)
+        return paginator_class.get_paginated_response(data=serializer.data)   

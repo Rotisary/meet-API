@@ -101,24 +101,6 @@ class APIUser(User):
 
 
 class Profile(models.Model):
-    # OPTHAMOLOGIST = 'EY'
-    # OTOLARYNGOLOGIST = 'ENT'
-    # DERMATOLOGY = 'SK'
-    # DENTIST = 'DT'
-    # PHYSIOTHERAPIST = 'BN'
-    # PHYSICIAN = 'PN'
-    # UROLOGIST = 'UTI'
-    # GYNECOLOGIST = 'SOI'
-    # FIELD_CHOICES = [
-    #     (OPTHAMOLOGIST, 'opthamologist'),
-    #     (OTOLARYNGOLOGIST, 'otolaryngologist'),
-    #     (DERMATOLOGY, 'dermatologist'),
-    #     (DENTIST, 'dentist'),
-    #     (PHYSIOTHERAPIST, 'physiotherapist'),
-    #     (PHYSICIAN, 'physician'),
-    #     (UROLOGIST, 'urologist'),
-    #     (GYNECOLOGIST, 'gynecologist'),
-    # ]
     PRETEEN = 'PT'
     TEENAGER = 'TN'
     ADULT = 'AD'
@@ -132,7 +114,7 @@ class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='profile', on_delete=models.CASCADE)
     specialization = models.CharField(blank=False, null=False)
     patient_type = models.CharField(choices=AGE_GROUP_CHOICES, null=False, blank=False)
-    meet = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='meets', blank=True)
+    meets = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='meets_in', blank=True)
     rating = models.FloatField(default=0)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='created_at')
 
@@ -142,7 +124,7 @@ class Profile(models.Model):
     
 
     def number_of_meet(self):
-        return self.meet.count()
+        return self.meets.count()
 
 
 class DoctorReview(models.Model):

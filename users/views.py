@@ -1,3 +1,4 @@
 from django.shortcuts import render
 
-# Create your views here.
+def docs_view(request):
+    return render(request, 'users/docs.html')

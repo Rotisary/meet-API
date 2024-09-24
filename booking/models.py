@@ -31,11 +31,11 @@ class Complaint(models.Model):
         (FEMALE, 'female')
     ]
     patient = models.ForeignKey(settings.AUTH_USER_MODEL, 
-                                related_name='illness', 
+                                related_name='complaints', 
                                 on_delete=models.CASCADE)
     symptoms = models.ManyToManyField(Symptom, related_name='complaints', blank=True)
-    sex = models.CharField(choices=SEX_CHOICES, blank=True, null=True)
-    year_of_birth = models.IntegerField(null=True, blank=True)
+    sex = models.CharField(choices=SEX_CHOICES, blank=False, null=False)
+    year_of_birth = models.IntegerField(null=False, blank=False)
     age_group = models.CharField(choices=AGE_GROUP_CHOICES, default=PRETEEN,blank=False, null=False)
     treated_by = models.ForeignKey(settings.AUTH_USER_MODEL, 
                                       related_name='illness_treated', 
