@@ -50,7 +50,11 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
     def create(self, validated_data):
         password_two = validated_data.pop('password2', None)
-        return User.objects.create(**validated_data)
+        password = validated_data.pop('password')
+        user = User.objects.create(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user
 
 
 class APIUserSerializer(serializers.HyperlinkedModelSerializer):
@@ -77,20 +81,10 @@ class APIUserSerializer(serializers.HyperlinkedModelSerializer):
         return value
     
 
-    def save(self):
-        user = APIUser(
-                email = self.validated_data['email'].lower(),
-                username = self.validated_data['username'],
-                first_name = self.validated_data['first_name'].lower(),
-                last_name = self.validated_data['last_name'].lower(),
-                phone_number = self.validated_data['phone_number']
-            )
-        password = self.validated_data['password']
-        password2 = self.validated_data['password2']
-    
-
-        if password != password2:
-            raise serializers.ValidationError({'password': "second password does not match the first!"})
+    def create(self, validated_data):
+        password_two = validated_data.pop('password2', None)
+        password = validated_data.pop('password')
+        user = APIUser.objects.create(**validated_data)
         user.set_password(password)
         user.save()
         return user

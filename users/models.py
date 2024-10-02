@@ -135,19 +135,6 @@ class DoctorReview(models.Model):
     good = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='created_at')  
 
-    def save(self, *args, **kwargs):
-        profile_reviews = self.doctor.reviews.all() 
-        no_of_reviews = profile_reviews.count()
-        sum_of_stars = 0
-        for review in profile_reviews:
-            sum_of_stars += review.stars
-        try:
-            self.doctor.rating = sum_of_stars/no_of_reviews
-        except ZeroDivisionError:
-            self.doctor.rating = 0
-        self.doctor.save()
-        super().save(*args, **kwargs)
-
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance, created=False, **kwargs):

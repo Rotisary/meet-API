@@ -22,6 +22,7 @@ from users.api.serializers import (
 from users.models import User, Profile, DoctorReview
 from booking.api.custom_permissions import UserIsPatient, ReviewDetailPerm
 from .utils import CustomPagination
+from .custom_functions import update_rating
 
 
 @api_view(['POST', ])
@@ -73,8 +74,8 @@ class ObtainAuthTokenView(APIView):
     def post(self, request):
         data = {}
 
-        email = request.POST.get('email')
-        password = request.POST.get('password')
+        email = request.data.get('email')
+        password = request.data.get('password')
         account = authenticate(email=email, password=password)
 
         if account:
@@ -136,6 +137,30 @@ def api_update_user_detail_view(request, username):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Profile.DoesNotExist:
         raise NotFound(detail='this user does not exist')
+    
+
+@api_view(['DELETE', ])
+@permission_classes([IsAuthenticated])
+def api_delete_user_view(request, username):
+    try:
+        user = User.objects.get(username=username)
+   
+        if request.user != user:
+            raise PermissionDenied
+        else:
+            data = {}
+            if request.method == 'DELETE':
+                operation = user.delete()
+                if operation:
+                    data['success'] = 'delete successful'
+                    status_code = status.HTTP_200_OK
+                else:
+                    data['error'] = 'failed to delete user'
+                    status_code = status.HTTP_400_BAD_REQUEST
+                
+                return Response(data=data, status=status_code)
+    except User.DoesNotExist:
+        raise NotFound(detail='this user has already been deleted')
     
 
 class ChangePasswordApiView(UpdateAPIView):
@@ -235,6 +260,7 @@ def api_create_review_view(request, username):
                 serializer = ReviewSerializer(data=request.data)
                 if serializer.is_valid(raise_exception=True):
                     serializer.save(writer=request.user, doctor=profile)
+                    update_rating(profile)
                     return Response(data=serializer.data, status=status.HTTP_201_CREATED)
                 return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Profile.DoesNotExist:
