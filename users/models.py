@@ -4,6 +4,7 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
+from django.template.defaultfilters import slugify
 
 
 class UserManager(BaseUserManager):
@@ -58,7 +59,7 @@ class User(AbstractBaseUser):
         (PATIENT, 'patient'),
         (API_USER, 'api user')
     ]
-    email = models.EmailField(verbose_name='email', unique=True)
+    email = models.EmailField(max_length=251, verbose_name='email', unique=True)
     username = models.CharField(max_length=30, unique=True)
     date_joined = models.DateTimeField(verbose_name='date joined', auto_now_add=True)
     last_login = models.DateTimeField(verbose_name='last login', auto_now=True)
@@ -70,7 +71,7 @@ class User(AbstractBaseUser):
     category = models.TextField(choices=CATEGORY_CHOICE, max_length=20)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
-    phone_number = models.CharField(blank=True, null=True)
+    phone_number = models.CharField(max_length=11, blank=True, null=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'category', 'first_name', 'last_name']
@@ -112,10 +113,11 @@ class Profile(models.Model):
         (OLD_ADULT, 'Old Adult')
     ]
     user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='profile', on_delete=models.CASCADE)
-    specialization = models.CharField(blank=False, null=False)
+    specialization = models.CharField(max_length=100,blank=False, null=False)
     patient_type = models.CharField(choices=AGE_GROUP_CHOICES, null=False, blank=False)
     meets = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='meets_in', blank=True)
     rating = models.FloatField(default=0)
+    slug = models.SlugField(max_length=50, blank=False, null=False, unique=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='created_at')
 
 
@@ -125,6 +127,14 @@ class Profile(models.Model):
 
     def number_of_meet(self):
         return self.meets.count()
+    
+
+    def save(self, *args, **kwargs):
+        first_name = self.user.first_name
+        last_name = self.user.last_name
+        id = self.id
+        self.slug = slugify(f"{first_name} {last_name} {id}")
+        return super(Profile, self).save(*args, **kwargs)
 
 
 class DoctorReview(models.Model):

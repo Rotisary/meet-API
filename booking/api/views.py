@@ -175,7 +175,7 @@ class api_complaint_list_view(ListAPIView):
 
     def get_queryset(self):
         user = self.request.query_params.get('username')
-        queryset = Complaint.objects.filter(treated_by__username=user)
+        queryset = Complaint.objects.filter(treated_by__user__username=user)
         return queryset
 
 
@@ -185,8 +185,11 @@ def api_related_doctors_list_view(request, pk):
     if request.method == 'GET':
         secret_key = 'Fp78JnAf62SmTg35D'
         requested_uri = "https://authservice.priaid.ch/login"
+        # get apimedic authentication token
         token = get_token(secret_key, requested_uri)
+
         try:
+            # get arguments for api data function
             complaint = Complaint.objects.get(id=pk)
             symptom_id_list = []
             symptoms = complaint.symptoms.all()
@@ -198,6 +201,7 @@ def api_related_doctors_list_view(request, pk):
             year_of_birth = complaint.year_of_birth
             age_group = complaint.age_group
 
+            # call get api data function
             specialisations_list, issues = get_api_data(
                 token, 
                 symptom_id_list, 
@@ -205,6 +209,7 @@ def api_related_doctors_list_view(request, pk):
                 year_of_birth
             )
 
+            # filter doctors and them to data list
             doctors = Profile.objects.all()
             doctors_that_match = []
 
@@ -219,8 +224,18 @@ def api_related_doctors_list_view(request, pk):
             if not doctors_that_match:
                 data['message'] = "sorry, we don't any have doctor that can treat your probable illness. Please try again later"
             else:
+                # sort data list
                 doctors_that_match_sorted = sorted(doctors_that_match, key=lambda doctor: -doctor.rating)
                 serializer = ProfileSerializer(set(doctors_that_match_sorted), many=True, context={'request': request})
+
+                # remove unwanted fields from data
+                for object in serializer.data:
+                    object.pop('meets')
+                    object.pop('appointments_booked')
+                    object.pop('id')
+                    object.pop('slug')
+                    object.pop('reviews')
+
                 data['doctor suggestions'] = serializer.data
             return Response(data=data, status=status.HTTP_200_OK)
         except Complaint.DoesNotExist:
@@ -242,7 +257,7 @@ def api_add_to_doctors_meet_view(request, username, pk):
             else:
                 if doctor.number_of_meet() < 3:
                     doctor.meets.add(patient)
-                    complaint.treated_by = doctor.user
+                    complaint.treated_by = doctor
                     complaint.save()
                     data['message'] = "you have succesfully added yourself to this doctor's meet"
                 else:

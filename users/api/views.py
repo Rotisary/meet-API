@@ -209,16 +209,21 @@ class ChangePasswordApiView(UpdateAPIView):
 @api_view(['GET', ])
 @permission_classes([IsAuthenticated])
 @renderer_classes([JSONRenderer, BrowsableAPIRenderer])
-def api_profile_view(request, username):
+def api_profile_view(request, slug):
     try:
-        profile = Profile.objects.get(user__username=username)
+        profile = Profile.objects.get(slug=slug)
     
-        if request.user != profile.user:
-            raise PermissionDenied
-        else:
-            if request.method == 'GET': 
-                    serializer = ProfileSerializer(profile, context={'request': request})
-                    return Response(data=serializer.data)
+        if request.method == 'GET': 
+            if request.user.category == "DR" and request.user != profile.user:
+                raise PermissionDenied
+            else:
+                serializer = ProfileSerializer(profile, context={'request': request})
+                data = serializer.data
+                if request.user != profile.user:
+                    data.pop('meets')
+                    data.pop('appointments_booked')
+
+                return Response(data=data, status=status.HTTP_200_OK)
     except Profile.DoesNotExist:
         raise NotFound(detail='this profile does not exist')
 
@@ -226,9 +231,9 @@ def api_profile_view(request, username):
 @api_view(['PUT', ])
 @permission_classes([IsAuthenticated])
 @parser_classes([JSONParser, MultiPartParser])
-def api_update_profile_view(request, username):
+def api_update_profile_view(request, slug):
     try:
-        profile = Profile.objects.get(user__username=username)
+        profile = Profile.objects.get(slug=slug)
 
     
         if request.user != profile.user:
@@ -279,7 +284,7 @@ def api_review_detail_view(request, pk):
             raise PermissionDenied
         else:
             if request.method == 'GET':
-                serializer = ReviewSerializer(review, context={'request': request})
+                serializer = ReviewSerializer(review)
                 return Response(serializer.data)
     except DoctorReview.DoesNotExist:
         raise NotFound(detail='this review does not exist')
@@ -316,5 +321,5 @@ def api_review_list_view(request, username):
     if request.method == 'GET':
         paginator_class = CustomPagination()
         queryset = paginator_class.paginate_queryset(reviews, request, None)
-        serializer = ReviewSerializer(queryset,  many=True, context={'request': request})
+        serializer = ReviewSerializer(queryset,  many=True)
         return paginator_class.get_paginated_response(data=serializer.data)   

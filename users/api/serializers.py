@@ -14,7 +14,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         read_only=True,
         view_name='profile-detail',
         many=True,
-        lookup_url_kwarg='username'
+        lookup_field='slug'
     )
     appointments_in = serializers.HyperlinkedRelatedField(
         read_only=True,
@@ -28,7 +28,6 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             'password': {'write_only': True},
             'url': {'lookup_field': 'username'},
             'id': {'read_only': True},
-            'meets': {'lookup_url_kwarg': 'username'},
             'phone_number': {'required': False}
         }
 
@@ -110,9 +109,9 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Profile
-        fields = ['url', 'id', 'user', 'specialization', 'patient_type', 'meets', 'appointments_booked', 'reviews', 'rating']
+        fields = ['url', 'id', 'user', 'slug', 'specialization', 'patient_type', 'meets', 'appointments_booked', 'reviews', 'rating']
         extra_kwargs = {
-            'url': {'lookup_url_kwarg': 'username'},
+            'url': {'lookup_field': 'slug'},
             'id': {'read_only': True},
             'user': {
                 'lookup_field': 'username',
@@ -132,12 +131,26 @@ class ChangePasswordSerializer(serializers.Serializer):
     confirm_password = serializers.CharField(write_only=True, required=True)
 
 
-class ReviewSerializer(serializers.HyperlinkedModelSerializer):
-    writer = serializers.StringRelatedField(read_only=True)
-    doctor = serializers.StringRelatedField(read_only=True)
+class ReviewSerializer(serializers.ModelSerializer):
+    writer = serializers.SerializerMethodField('get_writer_name')
+    doctor = serializers.SerializerMethodField('get_doctor_name')
     class Meta:
         model = DoctorReview
         fields = ['writer','id', 'doctor', 'body', 'stars']
         extra_kwargs = {
             'id': {'read_only': True}
         }
+
+    
+    def get_writer_name(self, review):
+        first_name = review.writer.first_name
+        last_name = review.writer.last_name
+        full_name = f"{first_name} {last_name}"
+        return full_name
+    
+
+    def get_doctor_name(self, review):
+        first_name = review.doctor.user.first_name
+        last_name = review.doctor.user.last_name
+        full_name = f"{first_name} {last_name}"
+        return full_name

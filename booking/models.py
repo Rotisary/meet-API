@@ -6,7 +6,7 @@ from django.db.models.manager import BaseManager
 
 class Symptom(models.Model):
     ID = models.IntegerField(unique=True, null=False, blank=False)
-    Name = models.CharField(null=False, blank=False)
+    Name = models.CharField(max_length=225, null=False, blank=False)
 
 
     def __str__(self):
@@ -36,12 +36,12 @@ class Complaint(models.Model):
     symptoms = models.ManyToManyField(Symptom, related_name='complaints', blank=True)
     sex = models.CharField(choices=SEX_CHOICES, blank=False, null=False)
     year_of_birth = models.IntegerField(null=False, blank=False)
-    age_group = models.CharField(choices=AGE_GROUP_CHOICES, default=PRETEEN,blank=False, null=False)
-    treated_by = models.ForeignKey(settings.AUTH_USER_MODEL, 
-                                      related_name='illness_treated', 
-                                      blank=True, 
-                                      null=True, 
-                                      on_delete=models.SET_NULL)
+    age_group = models.CharField(choices=AGE_GROUP_CHOICES, default=PRETEEN, blank=False, null=False)
+    treated_by = models.ForeignKey(Profile, 
+                                   related_name='illness_treated', 
+                                   blank=True, 
+                                   null=True, 
+                                   on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='created_at', null=True)
 
     objects = models.Manager()

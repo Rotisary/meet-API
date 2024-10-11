@@ -2,9 +2,6 @@ import datetime
 from rest_framework import serializers
 from booking.models import Complaint, Appointment, Symptom
 
-# more validations; validation for Complaint update and delete
-# update; if they leave a field empty, it should show a message, if they enter a wrong field, it should show a message
-
 
 class ComplaintSerializer(serializers.HyperlinkedModelSerializer):
     symptoms = serializers.StringRelatedField(
@@ -13,7 +10,7 @@ class ComplaintSerializer(serializers.HyperlinkedModelSerializer):
     )
     class Meta:
         model = Complaint
-        fields = ['url','id', 'symptoms', 'sex', 'year_of_birth', 'age_group', 'patient', 'treated_by']
+        fields = ['id', 'symptoms', 'sex', 'year_of_birth', 'age_group', 'patient', 'treated_by']
         extra_kwargs = {
             'patient': {
                 'lookup_field': 'username',
@@ -23,7 +20,7 @@ class ComplaintSerializer(serializers.HyperlinkedModelSerializer):
                 'read_only': True
             },
             'treated_by': {
-                'lookup_field': 'username',
+                'lookup_field': 'slug',
                 'read_only': True
             }
         }
@@ -52,22 +49,28 @@ class SymptomSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class AppointmentSerializer(serializers.HyperlinkedModelSerializer):
-    owner = serializers.StringRelatedField(read_only=True)
-    patient = serializers.HyperlinkedRelatedField(
-        view_name='user-detail',
-        lookup_field = 'username', 
-        read_only=True,
-    )
+    patient = serializers.SerializerMethodField('get_patient_name')
 
     class Meta:
         model = Appointment
-        fields = ['url', 'id', 'owner', 'patient', 'date_of_appointment', 'time_of_appointment']
+        fields = ['id', 'owner', 'patient', 'date_of_appointment', 'time_of_appointment']
         extra_kwargs = {
             'id': {
                 'read_only': True
-            }
+            },
+            'owner': {
+                'view_name': 'profile-detail',
+                'lookup_field': 'slug',
+                'read_only': True
+            },
         }
 
+   
+    def get_patient_name(self, appointment):
+        first_name = appointment.patient.first_name
+        last_name = appointment.patient.last_name
+        full_name = f"{first_name} {last_name}"
+        return full_name
     
     def create(self, validated_data):
         return Appointment.objects.create(**validated_data)

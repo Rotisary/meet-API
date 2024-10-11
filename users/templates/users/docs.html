@@ -391,7 +391,7 @@
                                                                 <br>"year_of_birth": 2003,
                                                                 <br>"age_group": "AD",
                                                                 <br>"patient": "http://127.0.0.1:8000/api/users/details/tester/",
-                                                                <br>"treated_by": "http://127.0.0.1:8000/api/users/details/tester1/"
+                                                                <br>"treated_by": "http://127.0.0.1:8000/api/users/profile/first-tester-1/"
                                                             <br>}
                                                         <br>]
                                                     </div>
@@ -446,7 +446,7 @@
                                                                     <br>"year_of_birth": 2003,
                                                                     <br>"age_group": "AD",
                                                                     <br>"patient": "http://127.0.0.1:8000/api/users/details/tester/",
-                                                                    <br>"treated_by": "http://127.0.0.1:8000/api/users/details/tester1/"
+                                                                    <br>"treated_by": "http://127.0.0.1:8000/api/users/profile/first-tester-1/"
                                                                 <br>}
                                                             <br>]
                                                         </div>
@@ -489,14 +489,10 @@
                                                         <div style="padding-left: 3rem;">
                                                             <br>{
                                                                 <div style="padding-left: 3rem;">
-                                                                    <br>"url": "http://127.0.0.1:8000/api/users/profile/7/",
-                                                                    <br>"id": 7,
+                                                                    <br>"url": "http://127.0.0.1:8000/api/users/profile/{profile_slug}/",
                                                                     <br>"user": "http://127.0.0.1:8000/api/users/details/practiseuser/",
                                                                     <br>"specialization": "Ophthalmology",
                                                                     <br>"patient_type": "AD",
-                                                                    <br>"meets": [],
-                                                                    <br>"appointments_booked": [],
-                                                                    <br>"reviews": [],
                                                                     <br>"rating": 0.0
                                                                 </div>
                                                             <br>}
@@ -586,8 +582,8 @@
                                                             <div style="padding-left: 3rem;">
                                                                 <br>"url": "http://127.0.0.1:8000/api/booking/appointment/5/",
                                                                 <br>"id": 5,
-                                                                <br>"owner": "tester1's profile",
-                                                                <br>"patient": "http://127.0.0.1:8000/api/users/details/tester/",
+                                                                <br>"owner": "http://127.0.0.1:8000/api/users/profile/first-tester-1/",
+                                                                <br>"patient": "test user",
                                                                 <br>"date_of_appointment": "2024-09-24",
                                                                 <br>"time_of_appointment": "12:00:00"
                                                             </div>
@@ -616,8 +612,8 @@
                                                             <div style="padding-left: 3rem;">
                                                                 <br>"url": "http://127.0.0.1:8000/api/booking/appointment/5/",
                                                                 <br>"id": 5,
-                                                                <br>"owner": "tester1's profile",
-                                                                <br>"patient": "http://127.0.0.1:8000/api/users/details/tester/",
+                                                                <br>"owner": "http://127.0.0.1:8000/api/users/profile/first-tester-1/",
+                                                                <br>"patient": "test user",
                                                                 <br>"date_of_appointment": "2024-09-24",
                                                                 <br>"time_of_appointment": "12:00:00"
                                                             </div>
@@ -680,7 +676,7 @@
                                                 <li class="field-list">patient_type(Choice field: preteen(PT), teenager(TN), adult(AD), old adult(OAD))</li>
                                                 <p>remember to enter the abbreviations and not the full words</p>
                                             </ul>
-                                            <p>make a PUT request to: <h3>http://127.0.0.1:8000/api/users/profile/{doctor username}/update/</h3></p>
+                                            <p>make a PUT request to: <h3>http://127.0.0.1:8000/api/users/profile/{profile slug}/update/</h3></p>
                                             <h4>Sample request</h4>
                                             <div class="snippet-box">
                                                 body = {
@@ -695,7 +691,7 @@
                                                         <br>'Content-Type': 'application/json'
                                                     </div>
                                                 <br>}
-                                                <br>url = 'http://127.0.0.1:8000/api/users/profile/tester1/update/'
+                                                <br>url = 'http://127.0.0.1:8000/api/users/profile/first-tester-1/update/'
                                                 <br>request = requests.put(url, headers=headers, json=body)
                                                 <br>response_data = request.json()
                                             </div>
@@ -712,7 +708,7 @@
                                             </p>
                                             <li>
                                                 <p>*Read: </p>
-                                                <p>You can access your profile by making a GET request to: <h3>http://127.0.0.1:8000/api/users/profile/{doctor's username}/</h3></p>
+                                                <p>You can access your profile by making a GET request to: <h3>http://127.0.0.1:8000/api/users/profile/{profile slug}/</h3></p>
                                                 <h4>Sample request</h4>
                                                 <div class="snippet-box">
                                                     <br>headers = {
@@ -720,7 +716,7 @@
                                                             <br>'Authorization': 'Token {your generated token}'
                                                         </div>
                                                     <br>}
-                                                    <br>url = 'http://127.0.0.1:8000/api/users/profile/practiseuser/'
+                                                    <br>url = 'http://127.0.0.1:8000/api/users/profile/practise-one-7/'
                                                     <br>request = requests.get(url, headers=headers)
                                                     <br>response_data = request.json()
                                                 </div>
@@ -729,7 +725,7 @@
                                                     <p>
                                                         {
                                                         <div style="padding-left: 3rem;">
-                                                            <br>"url": "http://127.0.0.1:8000/api/users/profile/7/",
+                                                            <br>"url": "http://127.0.0.1:8000/api/users/profile/practise-one-7/",
                                                             <br>"id": 7,
                                                             <br>"user": "http://127.0.0.1:8000/api/users/details/practiseuser/",
                                                             <br>"specialization": "Ophthalmology",
@@ -775,7 +771,7 @@
                                                             <br>],
                                                             <br>"meets_in": [
                                                                 <div style="padding-left: 3rem;">
-                                                                    <br>"http://127.0.0.1:8000/api/users/profile/1/"
+                                                                    <br>"http://127.0.0.1:8000/api/users/profile/first-tester-1/"
                                                                 </div>
                                                             <br>],
                                                             <br>"appointments_in": [
@@ -941,9 +937,9 @@
                                                         <p>
                                                             {
                                                             <div style="padding-left: 3rem;">
-                                                                <br>"writer": "tester",
+                                                                <br>"writer": "test user",
                                                                 <br>"id": 3,
-                                                                <br>"doctor": "tester1's profile",
+                                                                <br>"doctor": "first tester",
                                                                 <br>"body": "this is a test reiew",
                                                                 <br>"stars": 3
                                                             </div>
@@ -971,9 +967,9 @@
                                                         <p>
                                                             {
                                                             <div style="padding-left: 3rem;">
-                                                                <br>"writer": "tester",
+                                                                <br>"writer": "test user",
                                                                 <br>"id": 3,
-                                                                <br>"doctor": "tester1's profile",
+                                                                <br>"doctor": "first tester",
                                                                 <br>"body": "this is a test reiew",
                                                                 <br>"stars": 3
                                                             </div>
@@ -1037,16 +1033,16 @@
                                                                         <div style="padding-left: 3rem;">
                                                                             <br>"writer": "Roti",
                                                                             <br>"id": 1,
-                                                                            <br>"doctor": "tester1's profile",
+                                                                            <br>"doctor": "first tester",
                                                                             <br>"body": "he does not know how to communicate well with his patients",
                                                                             <br>"stars": 2
                                                                         </div>
                                                                     <br>},
                                                                     <br>{
                                                                         <div style="padding-left: 3rem;">
-                                                                            <br>"writer": "tester",
+                                                                            <br>"writer": "test user",
                                                                             <br>"id": 3,
-                                                                            <br>"doctor": "tester1's profile",
+                                                                            <br>"doctor": "first tester",
                                                                             <br>"body": "this is a test reiew",
                                                                             <br>"stars": 3
                                                                         </div>

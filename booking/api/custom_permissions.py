@@ -24,7 +24,7 @@ class ComplaintDetailPerm(permissions.BasePermission):
         if request.user.category == 'PT':
             return request.user == obj.patient
         else:
-            return request.user.profile in obj.patient.meets.all()
+            return request.user.profile in obj.patient.meets_in.all()
         
 
 class AppointmentDetailPerm(permissions.BasePermission):
