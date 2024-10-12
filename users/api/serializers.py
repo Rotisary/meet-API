@@ -121,7 +121,8 @@ class ProfileSerializer(serializers.HyperlinkedModelSerializer):
                 'lookup_field': 'username',
                 'read_only': True
                 },
-            'rating': {'read_only': True}
+            'rating': {'read_only': True},
+            'slug': {'read_only': True}
         }
 
 
