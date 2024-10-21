@@ -72,7 +72,7 @@
                                         <li class="field-list">phone_number(not required)</li>
                                     </ul>
                                 
-                                    <p>make a POST request to : <h3>http://127.0.0.1:8000/api/users/register/</h3></p>
+                                    <p>make a POST request to : <h3>https://meet-api-3uf7.onrender.com/api/users/register/</h3></p>
                                     <h4>Sample request</h4>
                                     <div class="snippet-box">
                                         body = {
@@ -92,7 +92,7 @@
                                                 <br>'Content-Type': 'application/json'
                                             </div>
                                         <br>}
-                                        <br>url = 'http://127.0.0.1:8000/api/users/register/'
+                                        <br>url = 'https://meet-api-3uf7.onrender.com/api/users/register/'
                                         <br>request = requests.post(url, headers=headers, json=body)
                                         <br>response_data = request.json()
                                     </div>
@@ -129,7 +129,7 @@
                                         <li class="field-list">phone_number(not required)</li>
                                     </ul>
                                     <p>
-                                        After entering values for the fields above, make a POST request to: <h3>http://127.0.0.1:8000/api/users/register/apiuser/</h3>
+                                        After entering values for the fields above, make a POST request to: <h3>https://meet-api-3uf7.onrender.com/api/users/register/apiuser/</h3>
                                     </p>
                                     <h4>Sample request</h4>
                                     <div class="snippet-box">
@@ -149,7 +149,7 @@
                                                 <br>'Content-Type': 'application/json'
                                             </div>
                                         <br>}
-                                        <br>url = 'http://127.0.0.1:8000/api/users/register/apiuser/'
+                                        <br>url = 'https://meet-api-3uf7.onrender.com/api/users/register/apiuser/'
                                         <br>request = requests.post(url, headers=headers, json=body)
                                         <br>response_data = request.json()
                                     </div>
@@ -198,7 +198,7 @@
                                                     </ul>
                                                     <p>To add symptoms, add a query parameter called 'symptoms' to your url and populate it with IDs of the symptoms you want to add in the format shown below</p>
                                                     <p>
-                                                        After entering values for the fields, make a POST request to: <h3>http://127.0.0.1:8000/api/booking/complaint/create?symptoms=ID1_ID2_ID3</h3>
+                                                        After entering values for the fields, make a POST request to: <h3>https://meet-api-3uf7.onrender.com/api/booking/complaint/create?symptoms=ID1_ID2_ID3</h3>
                                                     </p>
                                                     <h4>Sample request</h4>
                                                     <div class="snippet-box">
@@ -215,7 +215,7 @@
                                                                 <br>'Content-Type': 'application/json'
                                                             </div>
                                                         <br>}
-                                                        <br>url = 'http://127.0.0.1:8000/api/booking/complaint/create/'
+                                                        <br>url = 'https://meet-api-3uf7.onrender.com/api/booking/complaint/create/'
                                                         <br>query_params = {
                                                             <div style="padding-left: 3rem;">
                                                                 <br>'symptoms': '68_66'
@@ -229,7 +229,7 @@
                                                         <p>
                                                             {
                                                             <div style="padding-left: 3rem;">
-                                                                <br>"url": "http://127.0.0.1:8000/api/booking/complaint/11/",
+                                                                <br>"url": "https://meet-api-3uf7.onrender.com/api/booking/complaint/11/",
                                                                 <br>"id": 11
                                                                 <br>"symptoms": [
                                                                 <div style="padding-left: 3rem;">
@@ -240,19 +240,19 @@
                                                                 <br>"sex": "male",
                                                                 <br>"year_of_birth": 2003,
                                                                 <br>"age_group": "AD",
-                                                                <br>"patient": "http://127.0.0.1:8000/api/users/details/tester/",
+                                                                <br>"patient": "https://meet-api-3uf7.onrender.com/api/users/details/tester/",
                                                                 <br>"treated_by": null
                                                             </div>
                                                             <br>}
                                                         </p>
                                                     </div>
                                                     <p>
-                                                        * To get the list of symptoms make  a GET request to: <h3>http://127.0.0.1:8000/api/booking/symptoms/list</h3>
+                                                        * To get the list of symptoms make  a GET request to: <h3>https://meet-api-3uf7.onrender.com/api/booking/symptoms/list</h3>
                                                     </p>
                                                 </li>
                                                 <li>
                                                     <p>Read: </p>
-                                                        <p>*Make a GET request to: <h3>http://127.0.0.1:8000/api/booking/complaint/{complaint id}/</h3></p>
+                                                        <p>*Make a GET request to: <h3>https://meet-api-3uf7.onrender.com/api/booking/complaint/{complaint id}/</h3></p>
                                                         <h4>Sample request</h4>
                                                         <div class="snippet-box">
                                                             <br>headers = {
@@ -260,7 +260,7 @@
                                                                     <br>'Authorization': 'Token {your generated token}',
                                                                 </div>
                                                             <br>}
-                                                            <br>url = 'http://127.0.0.1:8000/api/booking/complaint/11/'
+                                                            <br>url = 'https://meet-api-3uf7.onrender.com/api/booking/complaint/11/'
                                                             <br>request = requests.get(url, headers=headers)
                                                             <br>response_data = request.json()
                                                         </div>
@@ -269,7 +269,7 @@
                                                             <p>
                                                                 {
                                                                 <div style="padding-left: 3rem;">
-                                                                    <br>"url": "http://127.0.0.1:8000/api/booking/complaint/11/",
+                                                                    <br>"url": "https://meet-api-3uf7.onrender.com/api/booking/complaint/11/",
                                                                     <br>"id": 11
                                                                     <br>"symptoms": [
                                                                     <div style="padding-left: 3rem;">
@@ -280,7 +280,7 @@
                                                                     <br>"sex": "male",
                                                                     <br>"year_of_birth": 2003,
                                                                     <br>"age_group": "AD",
-                                                                    <br>"patient": "http://127.0.0.1:8000/api/users/details/tester/",
+                                                                    <br>"patient": "https://meet-api-3uf7.onrender.com/api/users/details/tester/",
                                                                     <br>"treated_by": null
                                                                 </div>
                                                             <br>}
@@ -290,7 +290,7 @@
                                                 <li>
                                                     <p>Update: </p>
                                                     <p>
-                                                        *Enter values for the field(s) you want to update and make a PUT request to: <h3>http://127.0.0.1:8000/api/booking/complaint/{complaint id}/update/</h3>
+                                                        *Enter values for the field(s) you want to update and make a PUT request to: <h3>https://meet-api-3uf7.onrender.com/api/booking/complaint/{complaint id}/update/</h3>
                                                     </p>
                                                     <p>
                                                         *To update symptoms, add a symptoms query parameter to the url as you would if you were creating a new complaint
@@ -303,7 +303,7 @@
                                                                 <br>'Content-Type': 'application/json'
                                                             </div>
                                                         <br>}
-                                                        <br>url = 'http://127.0.0.1:8000/api/booking/complaint/11/update/'
+                                                        <br>url = 'https://meet-api-3uf7.onrender.com/api/booking/complaint/11/update/'
                                                         <br>request = requests.put(url, headers=headers, json=body)
                                                         <br>response_data = request.json()
                                                     </div>
@@ -320,7 +320,7 @@
                                                 </li>
                                                 <li>
                                                     <p>Delete: </p>
-                                                    <p>*Make a DELETE request to: <h3>http://127.0.0.1:8000/api/booking/complaint/{complaint id}/delete/</h3></p>
+                                                    <p>*Make a DELETE request to: <h3>https://meet-api-3uf7.onrender.com/api/booking/complaint/{complaint id}/delete/</h3></p>
                                                     <h4>Sample request</h4>
                                                     <div class="snippet-box">
                                                         <br>headers = {
@@ -328,7 +328,7 @@
                                                                 <br>'Authorization': 'Token {your generated token}'
                                                             </div>
                                                         <br>}
-                                                        <br>url = 'http://127.0.0.1:8000/api/booking/complaint/11/delete/'
+                                                        <br>url = 'https://meet-api-3uf7.onrender.com/api/booking/complaint/11/delete/'
                                                         <br>request = requests.delete(url, headers=headers)
                                                         <br>response_data = request.json()
                                                     </div>
@@ -351,7 +351,7 @@
                                                 This is the endpoint that would be called if a user signed up as a doctor wants to see the list of complaints that he/she has treated.
                                             </p>
                                             <p>
-                                                Make GET request to: <h3>http://127.0.0.1:8000/api/booking/complaint/list/?username={doctor's username}</h3>
+                                                Make GET request to: <h3>https://meet-api-3uf7.onrender.com/api/booking/complaint/list/?username={doctor's username}</h3>
                                             </p>
                                             <h4>Sample request</h4>
                                             <div class="snippet-box">
@@ -365,7 +365,7 @@
                                                         <br>'username': 'tester1'
                                                     </div>
                                                 <br>}
-                                                <br>url = 'http://127.0.0.1:8000/api/booking/complaint/list/
+                                                <br>url = 'https://meet-api-3uf7.onrender.com/api/booking/complaint/list/
                                                 <br>request = requests.get(url, params=query_params, headers=headers)
                                                 <br>response_data = request.json()
                                             </div>
@@ -380,7 +380,7 @@
                                                         <br>"results": [
                                                             <br>{
                                                                 <div style="padding-left: 3rem;">
-                                                                    <br>"url": "http://127.0.0.1:8000/api/booking/complaint/11/",
+                                                                    <br>"url": "https://meet-api-3uf7.onrender.com/api/booking/complaint/11/",
                                                                     <br>"id": 11,
                                                                     <br>"symptoms": [
                                                                     <br>"Vision impairment",
@@ -390,8 +390,8 @@
                                                                 <br>"sex": "male",
                                                                 <br>"year_of_birth": 2003,
                                                                 <br>"age_group": "AD",
-                                                                <br>"patient": "http://127.0.0.1:8000/api/users/details/tester/",
-                                                                <br>"treated_by": "http://127.0.0.1:8000/api/users/profile/first-tester-1/"
+                                                                <br>"patient": "https://meet-api-3uf7.onrender.com/api/users/details/tester/",
+                                                                <br>"treated_by": "https://meet-api-3uf7.onrender.com/api/users/profile/first-tester-1/"
                                                             <br>}
                                                         <br>]
                                                     </div>
@@ -405,7 +405,7 @@
                                                 </p>
                                             </p>
                                             <p>
-                                                Example URL:  <h3>http://127.0.0.1:8000/api/booking/complaint/list?username={doctor's username}&search={name of symptom}</h3>
+                                                Example URL:  <h3>https://meet-api-3uf7.onrender.com/api/booking/complaint/list?username={doctor's username}&search={name of symptom}</h3>
                                             </p>
                                             <h4>Sample request</h4>
                                             <div class="snippet-box">
@@ -420,7 +420,7 @@
                                                         <br>'search': 'Vision impairment' (search by symptom)
                                                     </div>
                                                 <br>}
-                                                <br>url = 'http://127.0.0.1:8000/api/booking/complaint/list/'
+                                                <br>url = 'https://meet-api-3uf7.onrender.com/api/booking/complaint/list/'
                                                 <br>request = requests.get(url, params=query_params, headers=headers)
                                                 <br>response_data = request.json()
                                             </div>
@@ -435,7 +435,7 @@
                                                             <br>"results": [
                                                                 <br>{
                                                                     <div style="padding-left: 3rem;">
-                                                                        <br>"url": "http://127.0.0.1:8000/api/booking/complaint/11/",
+                                                                        <br>"url": "https://meet-api-3uf7.onrender.com/api/booking/complaint/11/",
                                                                         <br>"id": 11,
                                                                         <br>"symptoms": [
                                                                         <br>"Vision impairment",
@@ -445,8 +445,8 @@
                                                                     <br>"sex": "male",
                                                                     <br>"year_of_birth": 2003,
                                                                     <br>"age_group": "AD",
-                                                                    <br>"patient": "http://127.0.0.1:8000/api/users/details/tester/",
-                                                                    <br>"treated_by": "http://127.0.0.1:8000/api/users/profile/first-tester-1/"
+                                                                    <br>"patient": "https://meet-api-3uf7.onrender.com/api/users/details/tester/",
+                                                                    <br>"treated_by": "https://meet-api-3uf7.onrender.com/api/users/profile/first-tester-1/"
                                                                 <br>}
                                                             <br>]
                                                         </div>
@@ -460,7 +460,7 @@
                                                 This endpoint gets called whenever a user creates a new complaint and it returns a list of doctors that specialize in treating any of the suggested issues.
                                             </p>
                                             <p>
-                                                *Make GET request to: <h3>http://127.0.0.1:8000/api/booking/complaint/{complaint id}/match/results/</h3>
+                                                *Make GET request to: <h3>https://meet-api-3uf7.onrender.com/api/booking/complaint/{complaint id}/match/results/</h3>
                                             </p>
                                             <h4>Sample request</h4>
                                             <div class="snippet-box">
@@ -469,7 +469,7 @@
                                                         <br>'Authorization': 'Token {your generated token}'
                                                     </div>
                                                 <br>}
-                                                <br>url = 'http://127.0.0.1:8000/api/booking/complaint/11/match/results/'
+                                                <br>url = 'https://meet-api-3uf7.onrender.com/api/booking/complaint/11/match/results/'
                                                 <br>request = requests.get(url, headers=headers)
                                                 <br>response_data = request.json()
                                             </div>
@@ -489,8 +489,8 @@
                                                         <div style="padding-left: 3rem;">
                                                             <br>{
                                                                 <div style="padding-left: 3rem;">
-                                                                    <br>"url": "http://127.0.0.1:8000/api/users/profile/{profile_slug}/",
-                                                                    <br>"user": "http://127.0.0.1:8000/api/users/details/practiseuser/",
+                                                                    <br>"url": "https://meet-api-3uf7.onrender.com/api/users/profile/{profile_slug}/",
+                                                                    <br>"user": "https://meet-api-3uf7.onrender.com/api/users/details/practiseuser/",
                                                                     <br>"specialization": "Ophthalmology",
                                                                     <br>"patient_type": "AD",
                                                                     <br>"rating": 0.0
@@ -509,7 +509,7 @@
                                                 This is the endpoint that gets called whenever a patient decides to be added to a particular doctor's list of meets(a meet is a patient that has chosen a particular doctor for consultation. NOTE: a doctor can only be in three meets at a time)
                                             </p>
                                             <p>
-                                                *Make POST request to: <h3>http://127.0.0.1:8000/api/booking/meet/{doctor username}/{complaint id}/add/</h3>
+                                                *Make POST request to: <h3>https://meet-api-3uf7.onrender.com/api/booking/meet/{doctor username}/{complaint id}/add/</h3>
                                             </p>
                                             <h4>Sample request</h4>
                                             <div class="snippet-box">
@@ -518,7 +518,7 @@
                                                         <br>'Authorization': 'Token {your generated token}'
                                                     </div>
                                                 <br>}
-                                                <br>url = 'http://127.0.0.1:8000/api/booking/meet/tester1/11/add/'
+                                                <br>url = 'https://meet-api-3uf7.onrender.com/api/booking/meet/tester1/11/add/'
                                                 <br>request = requests.post(url, headers=headers)
                                                 <br>response_data = request.json()
                                             </div>
@@ -556,7 +556,7 @@
                                                         <li class="field-list">date_of_appointment(required)</li>
                                                         <li class="field-list">time_of_appointment(required)</li>
                                                     </ul>
-                                                    <p>*Make a POST request to: <h3>http://127.0.0.1:8000/api/booking/appointment/create/{patient username}/</h3></p>
+                                                    <p>*Make a POST request to: <h3>https://meet-api-3uf7.onrender.com/api/booking/appointment/create/{patient username}/</h3></p>
                                                     <h4>Sample request</h4>
                                                     <div class="snippet-box">
                                                         body = {
@@ -571,7 +571,7 @@
                                                                 <br>'Content-Type': 'application/json'
                                                             </div>
                                                         <br>}
-                                                        <br>url = 'http://127.0.0.1:8000/api/booking/appointment/create/tester'
+                                                        <br>url = 'https://meet-api-3uf7.onrender.com/api/booking/appointment/create/tester'
                                                         <br>request = requests.post(url, headers=headers, json=body)
                                                         <br>response_data = request.json()
                                                     </div>
@@ -580,9 +580,9 @@
                                                         <p>
                                                             {
                                                             <div style="padding-left: 3rem;">
-                                                                <br>"url": "http://127.0.0.1:8000/api/booking/appointment/5/",
+                                                                <br>"url": "https://meet-api-3uf7.onrender.com/api/booking/appointment/5/",
                                                                 <br>"id": 5,
-                                                                <br>"owner": "http://127.0.0.1:8000/api/users/profile/first-tester-1/",
+                                                                <br>"owner": "https://meet-api-3uf7.onrender.com/api/users/profile/first-tester-1/",
                                                                 <br>"patient": "test user",
                                                                 <br>"date_of_appointment": "2024-09-24",
                                                                 <br>"time_of_appointment": "12:00:00"
@@ -593,7 +593,7 @@
                                                 </li>
                                                 <li>
                                                     <p>Read: </p>
-                                                    <p>*Make a GET request to: <h3>http://127.0.0.1:8000/api/booking/appointment/{appointment id}/</h3></p>
+                                                    <p>*Make a GET request to: <h3>https://meet-api-3uf7.onrender.com/api/booking/appointment/{appointment id}/</h3></p>
                                                     <h4>Sample request</h4>
                                                     <div class="snippet-box">
                                                         <br>headers = {
@@ -601,7 +601,7 @@
                                                                 <br>'Authorization': 'Token {your generated token}'
                                                             </div>
                                                         <br>}
-                                                        <br>url = 'http://127.0.0.1:8000/api/booking/appointment/5/'
+                                                        <br>url = 'https://meet-api-3uf7.onrender.com/api/booking/appointment/5/'
                                                         <br>request = requests.get(url, headers=headers)
                                                         <br>response_data = request.json()
                                                     </div>
@@ -610,9 +610,9 @@
                                                         <p>
                                                             {
                                                             <div style="padding-left: 3rem;">
-                                                                <br>"url": "http://127.0.0.1:8000/api/booking/appointment/5/",
+                                                                <br>"url": "https://meet-api-3uf7.onrender.com/api/booking/appointment/5/",
                                                                 <br>"id": 5,
-                                                                <br>"owner": "http://127.0.0.1:8000/api/users/profile/first-tester-1/",
+                                                                <br>"owner": "https://meet-api-3uf7.onrender.com/api/users/profile/first-tester-1/",
                                                                 <br>"patient": "test user",
                                                                 <br>"date_of_appointment": "2024-09-24",
                                                                 <br>"time_of_appointment": "12:00:00"
@@ -624,7 +624,7 @@
                                                 <li>
                                                     <p>Update: </p>
                                                     <p>
-                                                        *Enter values for the field(s) you want to change and make PUT request to: <h3>http://127.0.0.1:8000/api/booking/appointment/{appointment id}/update/</h3>
+                                                        *Enter values for the field(s) you want to change and make PUT request to: <h3>https://meet-api-3uf7.onrender.com/api/booking/appointment/{appointment id}/update/</h3>
                                                     </p>
                                                     <h4>Sample request</h4>
                                                     <div class="snippet-box">
@@ -634,7 +634,7 @@
                                                                 <br>'Content-Type': 'application/json'
                                                             </div>
                                                         <br>}
-                                                        <br>url = 'http://127.0.0.1:8000/api/booking/appointment/5/update/'
+                                                        <br>url = 'https://meet-api-3uf7.onrender.com/api/booking/appointment/5/update/'
                                                         <br>request = requests.put(url, headers=headers)
                                                         <br>response_data = request.json()
                                                     </div>
@@ -676,7 +676,7 @@
                                                 <li class="field-list">patient_type(Choice field: preteen(PT), teenager(TN), adult(AD), old adult(OAD))</li>
                                                 <p>remember to enter the abbreviations and not the full words</p>
                                             </ul>
-                                            <p>make a PUT request to: <h3>http://127.0.0.1:8000/api/users/profile/{profile slug}/update/</h3></p>
+                                            <p>make a PUT request to: <h3>https://meet-api-3uf7.onrender.com/api/users/profile/{profile slug}/update/</h3></p>
                                             <h4>Sample request</h4>
                                             <div class="snippet-box">
                                                 body = {
@@ -691,7 +691,7 @@
                                                         <br>'Content-Type': 'application/json'
                                                     </div>
                                                 <br>}
-                                                <br>url = 'http://127.0.0.1:8000/api/users/profile/first-tester-1/update/'
+                                                <br>url = 'https://meet-api-3uf7.onrender.com/api/users/profile/first-tester-1/update/'
                                                 <br>request = requests.put(url, headers=headers, json=body)
                                                 <br>response_data = request.json()
                                             </div>
@@ -708,7 +708,7 @@
                                             </p>
                                             <li>
                                                 <p>*Read: </p>
-                                                <p>You can access your profile by making a GET request to: <h3>http://127.0.0.1:8000/api/users/profile/{profile slug}/</h3></p>
+                                                <p>You can access your profile by making a GET request to: <h3>https://meet-api-3uf7.onrender.com/api/users/profile/{profile slug}/</h3></p>
                                                 <h4>Sample request</h4>
                                                 <div class="snippet-box">
                                                     <br>headers = {
@@ -716,7 +716,7 @@
                                                             <br>'Authorization': 'Token {your generated token}'
                                                         </div>
                                                     <br>}
-                                                    <br>url = 'http://127.0.0.1:8000/api/users/profile/practise-one-7/'
+                                                    <br>url = 'https://meet-api-3uf7.onrender.com/api/users/profile/practise-one-7/'
                                                     <br>request = requests.get(url, headers=headers)
                                                     <br>response_data = request.json()
                                                 </div>
@@ -725,9 +725,9 @@
                                                     <p>
                                                         {
                                                         <div style="padding-left: 3rem;">
-                                                            <br>"url": "http://127.0.0.1:8000/api/users/profile/practise-one-7/",
+                                                            <br>"url": "https://meet-api-3uf7.onrender.com/api/users/profile/practise-one-7/",
                                                             <br>"id": 7,
-                                                            <br>"user": "http://127.0.0.1:8000/api/users/details/practiseuser/",
+                                                            <br>"user": "https://meet-api-3uf7.onrender.com/api/users/details/practiseuser/",
                                                             <br>"specialization": "Ophthalmology",
                                                             <br>"patient_type": "AD",
                                                             <br>"meets": [],
@@ -739,7 +739,7 @@
                                                     </p>
                                                 </div>
                                                 <p>*patients do not have access to profile endpoints</p>
-                                                <p>All users can access their user details by making a GET request to: <h3>http://127.0.0.1:8000/api/users/details/{user's username}/</h3></p>
+                                                <p>All users can access their user details by making a GET request to: <h3>https://meet-api-3uf7.onrender.com/api/users/details/{user's username}/</h3></p>
                                                 <h4>Sample request</h4>
                                                 <div class="snippet-box">
                                                     headers = {
@@ -747,7 +747,7 @@
                                                             <br>'Authorization': 'Token {your generated token}'
                                                         </div>
                                                     <br>}
-                                                    <br>url = 'http://127.0.0.1:8000/api/users/details/tester/'
+                                                    <br>url = 'https://meet-api-3uf7.onrender.com/api/users/details/tester/'
                                                     <br>request = requests.get(url, headers=headers)
                                                     <br>response_data = request.json()
                                                 </div>
@@ -756,7 +756,7 @@
                                                     <p>
                                                         {
                                                         <div style="padding-left: 3rem;">
-                                                            <br>"url": "http://127.0.0.1:8000/api/users/details/tester/",
+                                                            <br>"url": "https://meet-api-3uf7.onrender.com/api/users/details/tester/",
                                                             <br>"id": 8,
                                                             <br>"email": "test@gmail.com",
                                                             <br>"username": "tester",
@@ -766,17 +766,17 @@
                                                             <br>"phone_number": "09011345681",
                                                             <br>"complaints": [
                                                                 <div style="padding-left: 3rem;">
-                                                                    <br>"http://127.0.0.1:8000/api/booking/complaint/11/"
+                                                                    <br>"https://meet-api-3uf7.onrender.com/api/booking/complaint/11/"
                                                                 </div>
                                                             <br>],
                                                             <br>"meets_in": [
                                                                 <div style="padding-left: 3rem;">
-                                                                    <br>"http://127.0.0.1:8000/api/users/profile/first-tester-1/"
+                                                                    <br>"https://meet-api-3uf7.onrender.com/api/users/profile/first-tester-1/"
                                                                 </div>
                                                             <br>],
                                                             <br>"appointments_in": [
                                                                 <div style="padding-left: 3rem;">
-                                                                    "http://127.0.0.1:8000/api/booking/appointment/5/"
+                                                                    "https://meet-api-3uf7.onrender.com/api/booking/appointment/5/"
                                                                 </div>
                                                             <br>]
                                                         </div>  
@@ -790,7 +790,7 @@
                                                         *All users can update their user details(name, username e.t.c …). To do this:
                                                     </p>
                                                     <p>
-                                                        Enter the field(s) you want to update and make a PUT request to: <h3>http://127.0.0.1:8000/api/users/details/{user's username}/update/</h3>
+                                                        Enter the field(s) you want to update and make a PUT request to: <h3>https://meet-api-3uf7.onrender.com/api/users/details/{user's username}/update/</h3>
                                                     </p>
                                                     <p>*Note that the category field cannot be updated and there is a separate endpoint for password update</p>
                                                     <p>(it is the same process for integration accounts)</p>
@@ -802,7 +802,7 @@
                                                                 <br>'Content-Type': 'application/json'
                                                             </div>
                                                         <br>}
-                                                        <br>url = 'http://127.0.0.1:8000/api/users/details/tester/update/'
+                                                        <br>url = 'https://meet-api-3uf7.onrender.com/api/users/details/tester/update/'
                                                         <br>request = requests.put(url, headers=headers, json=body)
                                                         <br>response_data = request.json()
                                                     </div>
@@ -824,7 +824,7 @@
                                                     <li class="field-list">email</li>
                                                     <li class="field-list">password</li>
                                                 </ul>
-                                                <p>After entering values for the fields, make a POST request to: <h3>http://127.0.0.1:8000/api/users/login/</h3></p>
+                                                <p>After entering values for the fields, make a POST request to: <h3>https://meet-api-3uf7.onrender.com/api/users/login/</h3></p>
                                                 <p>After making the POST request, the user is authenticated and you get result like the one below: </p>
                                                 <h4>Sample request</h4>
                                                 <div class="snippet-box">
@@ -839,7 +839,7 @@
                                                             <br>'Content-Type': 'application/json'
                                                         </div>
                                                     <br>}
-                                                    <br>url = 'http://127.0.0.1:8000/api/users/login/'
+                                                    <br>url = 'https://meet-api-3uf7.onrender.com/api/users/login/'
                                                     <br>request = requests.post(url, headers=headers, json=body)
                                                     <br>response_data = request.json()
                                                 </div>
@@ -862,7 +862,7 @@
                                                     <li class="field-list">password(new password)</li>
                                                     <li class="field-list">confirm_password – the password and confirm password must match</li>
                                                 </ul>
-                                                <p>make a PUT request to: <h3>http://127.0.0.1:8000/api/users/change-password/</h3></p>
+                                                <p>make a PUT request to: <h3>https://meet-api-3uf7.onrender.com/api/users/change-password/</h3></p>
                                                 <h4>Sample request</h4>
                                                 <div class="snippet-box">
                                                     body = {
@@ -878,7 +878,7 @@
                                                             <br>'Content-Type': 'application/json'
                                                         </div>
                                                     <br>}
-                                                    <br>url = 'http://127.0.0.1:8000/api/users/change-password/'
+                                                    <br>url = 'https://meet-api-3uf7.onrender.com/api/users/change-password/'
                                                     <br>request = requests.put(url, headers=headers, json=body)
                                                     <br>response_data = request.json()
                                                 </div>
@@ -912,7 +912,7 @@
                                                         <li>stars(required) – an integer representing the number of stars</li>
                                                     </ul>
                                                     <p>
-                                                        Make a POST request to: <h3>http://127.0.0.1:8000/api/users/review/{doctor's username}/create/</h3>
+                                                        Make a POST request to: <h3>https://meet-api-3uf7.onrender.com/api/users/review/{doctor's username}/create/</h3>
                                                     </p>
                                                     <h4>Sample request</h4>
                                                     <div class="snippet-box">
@@ -928,7 +928,7 @@
                                                                 <br>'Content-Type': 'application/json'
                                                             </div>
                                                         <br>}
-                                                        <br>url = 'http://127.0.0.1:8000/api/users/reveiws/tester1/create/'
+                                                        <br>url = 'https://meet-api-3uf7.onrender.com/api/users/reveiws/tester1/create/'
                                                         <br>request = requests.post(url, headers=headers, json=body)
                                                         <br>response_data = request.json()
                                                     </div>
@@ -949,7 +949,7 @@
                                                 </li>
                                                 <li>
                                                     <p>Read: </p>
-                                                    <p>*Make a GET request to: <h3>http://127.0.0.1:8000/api/users/review/{review id}/</h3> </p>
+                                                    <p>*Make a GET request to: <h3>https://meet-api-3uf7.onrender.com/api/users/review/{review id}/</h3> </p>
                                                     <h4>Sample request</h4>
                                                     <h4>Sample request</h4>
                                                     <div class="snippet-box">
@@ -958,7 +958,7 @@
                                                                 <br>'Authorization': 'Token {your generated token}'
                                                             </div>
                                                         <br>}
-                                                        <br>url = 'http://127.0.0.1:8000/api/users/reveiw/3/'
+                                                        <br>url = 'https://meet-api-3uf7.onrender.com/api/users/reveiw/3/'
                                                         <br>request = requests.get(url, headers=headers)
                                                         <br>response_data = request.json()
                                                     </div>
@@ -979,7 +979,7 @@
                                                 <p>*Reviews cannot be updated</p>
                                                 <li>
                                                     <p>Delete: </p>
-                                                    <p>*Make DELETE request to: <h3>http://127.0.0.1:8000/api/users/review/{review id}/delete/</h3></p>
+                                                    <p>*Make DELETE request to: <h3>https://meet-api-3uf7.onrender.com/api/users/review/{review id}/delete/</h3></p>
                                                     <h4>Sample request</h4>
                                                     <div class="snippet-box">
                                                         <br>headers = {
@@ -987,7 +987,7 @@
                                                                 <br>'Authorization': 'your generated token'
                                                             </div>
                                                         <br>}
-                                                        <br>url = 'http://127.0.0.1:8000/api/users/review/3/delete/'
+                                                        <br>url = 'https://meet-api-3uf7.onrender.com/api/users/review/3/delete/'
                                                         <br>request = requests.delete(url, headers=headers)
                                                         <br>response_data = request.json()
                                                     </div>
@@ -1007,7 +1007,7 @@
                                                 <p>
                                                     This is the endpoint that users call to get a list of reviews specific to a particular doctor
                                                 </p>
-                                                <p>*Make GET request to: <h3>http://127.0.0.1:8000/api/users/reviews/{doctor's username}/list/</h3></p>
+                                                <p>*Make GET request to: <h3>https://meet-api-3uf7.onrender.com/api/users/reviews/{doctor's username}/list/</h3></p>
                                                 <h4>Sample request</h4>
                                                 <div class="snippet-box">
                                                     <br>headers = {
@@ -1015,7 +1015,7 @@
                                                             <br>'Authorization': 'Token {your generated token}'
                                                         </div>
                                                     <br>}
-                                                    <br>url = 'http://127.0.0.1:8000/api/users/reveiws/tester1/list/'
+                                                    <br>url = 'https://meet-api-3uf7.onrender.com/api/users/reveiws/tester1/list/'
                                                     <br>request = requests.get(url, headers=headers)
                                                     <br>response_data = request.json()
                                                 </div>
