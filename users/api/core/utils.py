@@ -7,9 +7,16 @@ def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
 
     if response is not None:
-        response.data['status code'] = response.status_code
-        response.data['status text'] = response.status_text
-
+        if isinstance(response.data, dict):
+            response.data['status code'] = response.status_code
+            response.data['status text'] = response.status_text
+        else:
+            response.data = {
+                "errors": response.data,
+                "status code": response.status_code,
+                "status text": response.status_text
+            }
+        
     return response
 
 

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.schemas import get_schema_view
-from users.api.utils import CustomSchemaGenerator
+from users.api.core.utils import CustomSchemaGenerator
 from users.views import docs_view
 
 urlpatterns = [

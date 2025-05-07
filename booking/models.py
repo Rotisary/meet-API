@@ -1,7 +1,6 @@
 from django.db import models
 from users.models import Profile
 from django.conf import settings
-from django.db.models.manager import BaseManager
 
 
 class Symptom(models.Model):
@@ -48,7 +47,39 @@ class Complaint(models.Model):
     
 
     def __str__(self):
-        return f"illness detail {self.id}"
+        return f"complaint detail {self.id}"
+    
+
+class MeetManager(models.Manager):
+
+    def get_active_meets(self):
+        return super().get_queryset().filter(has_ended=False)
+    
+
+    def get_ended_meets(self):
+        return super().get_queryset().filter(has_ended=True)
+    
+
+    def get_confirmed_meets(self):
+        return super().get_queryset().filter(is_confirmed=True)
+
+
+class Meet(models.Model):
+    ID = models.CharField(max_length=6, blank=True, null=True, unique=True)
+    doctor = models.ForeignKey(Profile, related_name='meets_booked_for', on_delete=models.DO_NOTHING)
+    patient = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='meets_booked', on_delete=models.DO_NOTHING)
+    complaint = models.OneToOneField(Complaint, related_name='meet_in', on_delete=models.DO_NOTHING)
+    has_ended = models.BooleanField(default=False)
+    is_confirmed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True, null=False)
+
+    objects = models.Manager()
+    filtered_objects = MeetManager()
+
+
+    def __str__(self):
+        return f"{self.ID}"
+
 
 
 class Appointment(models.Model):
@@ -67,7 +98,3 @@ class Appointment(models.Model):
 
     def __str__(self):
         return f"{self.owner.user.username}'s appointment, appointment {self.id}"
-    
-
-
-

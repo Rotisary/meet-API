@@ -1,4 +1,7 @@
-import requests, hmac, hashlib, base64
+import os, requests, hmac, hashlib, base64
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def get_token(secret_key, requested_uri):
@@ -6,14 +9,14 @@ def get_token(secret_key, requested_uri):
     bytes_requested_uri = requested_uri.encode('utf-8')
     hmac_md5 = hmac.new(bytes_secret_key, bytes_requested_uri, hashlib.md5)
     hashed_credentials = base64.b64encode(hmac_md5.digest()).decode('utf-8')
-    api_key = 'd6M3P_GMAIL_COM_AUT'
+    api_key = os.getenv('APIMEDIC_API_KEY')
 
     headers = {'Authorization': f'Bearer {api_key}:{hashed_credentials}'}
     response = requests.post(requested_uri, headers=headers)
     if response.status_code != 200:
         return f"{response.status_code} {response.text}"
     else:
-        return response.json()['Token']
+        return response.json()
     
 
 def get_api_data(token, symptom_id_list, sex, year_of_birth):

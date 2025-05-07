@@ -1,10 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.conf import settings
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
-from django.template.defaultfilters import slugify
+from django.template.defaultfilters import slugify  
 
 
 class UserManager(BaseUserManager):
@@ -113,11 +111,10 @@ class Profile(models.Model):
         (OLD_ADULT, 'Old Adult')
     ]
     user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='profile', on_delete=models.CASCADE)
-    specialization = models.CharField(max_length=100,blank=False, null=False)
-    patient_type = models.CharField(choices=AGE_GROUP_CHOICES, null=False, blank=False)
-    meets = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='meets_in', blank=True)
+    specialization = models.CharField(max_length=100, blank=True, null=True)
+    patient_type = models.CharField(choices=AGE_GROUP_CHOICES, blank=True, null=True)
     rating = models.FloatField(default=0)
-    slug = models.SlugField(max_length=50, blank=False, null=False, unique=True)
+    slug = models.SlugField(max_length=50, blank=True, null=True, unique=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='created_at')
 
 
@@ -125,15 +122,15 @@ class Profile(models.Model):
         return f"{self.user.username}'s profile"
     
 
-    def number_of_meet(self):
-        return self.meets.count()
+    def active_meets_count(self, *args, **kwargs):
+        from booking.models import Meet
+        count = Meet.filtered_objects.get_active_meets().filter(doctor=self).count()
+        return count
     
 
     def save(self, *args, **kwargs):
-        first_name = self.user.first_name
-        last_name = self.user.last_name
-        id = self.id
-        self.slug = slugify(f"{first_name} {last_name} {id}")
+        username = self.user.username
+        self.slug = slugify(username)
         return super(Profile, self).save(*args, **kwargs)
 
 
@@ -144,39 +141,3 @@ class DoctorReview(models.Model):
     stars = models.IntegerField(null=False)
     good = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='created_at')  
-
-
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_auth_token(sender, instance, created=False, **kwargs):
-    if created:
-        Token.objects.create(user=instance)
-
-
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_profile(sender, instance, created=False, **kwargs):
-    if created:
-        if instance.category == 'DR':
-            Profile.objects.create(user=instance)
-
-
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def save_profile(sender, instance,  **kwargs):
-        if instance.category == 'DR':
-            instance.profile.save()
-    
-
-@receiver(post_save, sender=APIUser)
-def create_api_auth_token(sender, instance, created=False, **kwargs):
-    if created:
-        Token.objects.create(user=instance)
-
-
-@receiver(post_save, sender=APIUser)
-def create_api_profile(sender, instance, created=False, **kwargs):
-    if created:
-        Profile.objects.create(user=instance)
-
-
-@receiver(post_save, sender=APIUser)
-def save_api_profile(sender, instance,  **kwargs):
-    instance.profile.save()

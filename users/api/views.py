@@ -1,11 +1,18 @@
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes, parser_classes, renderer_classes
+from rest_framework.decorators import (
+    api_view, 
+    permission_classes, 
+    parser_classes, 
+    renderer_classes, 
+    authentication_classes
+)
 from rest_framework.parsers import JSONParser, MultiPartParser
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate
+from django.core.cache import cache
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import UpdateAPIView
@@ -20,9 +27,11 @@ from users.api.serializers import (
     APIUserSerializer
 )
 from users.models import User, Profile, DoctorReview
-from booking.api.custom_permissions import UserIsPatient, ReviewDetailPerm
-from .utils import CustomPagination
-from .custom_functions import update_rating
+from booking.api.core.custom_permissions import UserIsPatient, ReviewDetailPerm
+from .core.utils import CustomPagination
+from .core.custom_permissions import OTPVerifiedPermission
+from .utils.profile_utils import update_rating
+from .utils.password_utils import generate_otp
 
 
 @api_view(['POST', ])
@@ -32,19 +41,17 @@ def registration_view(request):
     if request.method == 'POST':
         serializer = UserSerializer(data=request.data)
         data = {}
-        if serializer.is_valid(raise_exception=True):
-            newuser = serializer.save()
-            token = Token.objects.get(user=newuser).key
-            data['respone'] = 'successfully registered user'
-            data['email'] = newuser.email
-            data['username'] = newuser.username
-            data['category'] = newuser.category
-            data['first_name'] = newuser.first_name
-            data['last_name'] = newuser.last_name
-            data['phone_number'] = newuser.phone_number
-            data['token'] = token
-        else:
-            data = serializer.errors
+        serializer.is_valid(raise_exception=True)
+        newuser = serializer.save()
+        token = Token.objects.get(user=newuser).key
+        data['respone'] = 'successfully registered user'
+        data['email'] = newuser.email
+        data['username'] = newuser.username
+        data['category'] = newuser.category
+        data['first_name'] = newuser.first_name
+        data['last_name'] = newuser.last_name
+        data['phone_number'] = newuser.phone_number
+        data['token'] = token
         return Response(data)
  
 
@@ -54,13 +61,11 @@ def CreateAPIAccount(request):
     if request.method == "POST":
         serializer = APIUserSerializer(data=request.data, context={'request': request})
         data = {}
-        if serializer.is_valid(raise_exception=True):
-            user = serializer.save()
-            token = Token.objects.get(user=user).key
-            data['response'] = 'account created'
-            data['token'] = token
-        else:
-            data = serializer.errors
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        token = Token.objects.get(user=user).key
+        data['response'] = 'account created'
+        data['token'] = token
 
         return Response(data=data, status=status.HTTP_201_CREATED)
 
@@ -108,10 +113,9 @@ def api_user_detail_view(request, username):
         if request.user != user:
             raise PermissionDenied
         else:
-            if request.method == 'GET':
-                serializer = UserSerializer(user, context={'request': request})
-                data = serializer.data
-                return Response(data=data)
+            serializer = UserSerializer(user, context={'request': request})
+            data = serializer.data
+            return Response(data=data)
     except User.DoesNotExist:
         raise NotFound(detail='this user does not exist')
 
@@ -130,11 +134,10 @@ def api_update_user_detail_view(request, username):
             if request.method == 'PUT':
                 serializer = UserUpdateSerializer(user, data=request.data, partial=True)
                 data = {}
-                if serializer.is_valid(raise_exception=True):
-                    serializer.save()
-                    data['success'] = 'update successful'
-                    return Response(data=data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                data['success'] = 'update successful'
+                return Response(data=data)
     except Profile.DoesNotExist:
         raise NotFound(detail='this user does not exist')
     
@@ -161,49 +164,81 @@ def api_delete_user_view(request, username):
                 return Response(data=data, status=status_code)
     except User.DoesNotExist:
         raise NotFound(detail='this user has already been deleted')
-    
+
+
+@api_view(['GET', ])
+@authentication_classes([])
+@permission_classes([])
+@renderer_classes([JSONRenderer, BrowsableAPIRenderer])
+def api_request_otp_view(request):
+    user_email = request.query_params.get('email')
+    try:
+        user = User.objects.get(email=user_email)
+        generate_otp(user_email)
+        return Response(data={'message':'the otp has been sent to your email'}, status=status.HTTP_200_OK)
+    except User.DoesNotExist:
+        raise NotFound(detail='This user does not exist')
+
+
+@api_view(['GET', ])
+@authentication_classes([])
+@permission_classes([])
+@renderer_classes([JSONRenderer, BrowsableAPIRenderer])
+def api_verify_otp_view(request, email):
+    user_otp = request.query_params.get('otp')
+    saved_otp = cache.get(f'{email}_otp')
+
+    if not saved_otp:
+        return Response(data={'error': 'otp has expired'}, status=status.HTTP_400_BAD_REQUEST)
+    elif int(user_otp) != saved_otp:
+        return Response(data={'error': 'invalid otp'}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        cache.delete(f"{email}_otp")
+        cache.set(f"otp_verified_{email}", True, timeout=600)
+        return Response(data={"message": "OTP verified"}, status=status.HTTP_200_OK)
+
+
 
 class ChangePasswordApiView(UpdateAPIView):
-    authentication_classes = ([TokenAuthentication, ])
-    permission_classes = ([IsAuthenticated, ])
+    authentication_classes = ([])
+    permission_classes = ([OTPVerifiedPermission, ])
     parser_classes = [JSONParser, MultiPartParser]
     serializer_class = ChangePasswordSerializer
     model = User
 
+    def get_object(self, queryset=None): 
+        email = self.request.query_params.get('email')
+        if not email:
+            raise NotFound(detail='email not provided')
+        else:
+            try:
+                obj = User.objects.get(email=email)
+                return obj 
+            except User.DoesNotExist:
+                raise NotFound(detail='this user does not exist')
 
-    def get_object(self, queryset=None):
-        obj = self.request.user
-        return obj 
  
     
     def update(self, request, *args, **kwargs):
-        self.object = self.get_object()
+        user = self.get_object()
         serializer = self.get_serializer(data=request.data)
 
+        serializer.is_valid(raise_exception=True)
+        new_password = serializer.validated_data['new_password']
+        confirm_password = serializer.validated_data['confirm_password']
 
-        if serializer.is_valid(raise_exception=True):
-            new_password = serializer.validated_data['password']
-            confirm_password = serializer.validated_data['confirm_password']
-            if not self.object.check_password(serializer.validated_data['old_password']):
-                return Response({
-                    'old_password': 'wrong password! please enter correct password'}, 
-                    status=status.HTTP_400_BAD_REQUEST
-                    )
-
-            if confirm_password != new_password:
-                return Response({
-                    'confirm password': 'the passwords must match!'}, 
-                    status=status.HTTP_400_BAD_REQUEST
-                    )
-            
-            self.object.set_password(new_password)
-            self.object.save()
+        if confirm_password != new_password:
             return Response({
-                'password': 'password changed successfully!'}, 
-                status=status.HTTP_200_OK
+                'confirm password': 'the passwords must match!'}, 
+                status=status.HTTP_400_BAD_REQUEST
                 )
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        user.set_password(new_password)
+        user.save()
+        return Response({
+            'password': 'password changed successfully!'}, 
+            status=status.HTTP_200_OK
+            )
 
 
 @api_view(['GET', ])
@@ -242,11 +277,10 @@ def api_update_profile_view(request, slug):
             if request.method == 'PUT':
                 serializer = ProfileSerializer(profile, data=request.data, partial=True)
                 data = {}
-                if serializer.is_valid(raise_exception=True):
-                    serializer.save()
-                    data['success'] = 'update successful'
-                    return Response(data=data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                data['success'] = 'update successful'
+                return Response(data=data)
     except Profile.DoesNotExist:
         raise NotFound(detail='this profile does not exist')
 
@@ -263,11 +297,10 @@ def api_create_review_view(request, username):
         else:
             if request.method == 'POST':
                 serializer = ReviewSerializer(data=request.data)
-                if serializer.is_valid(raise_exception=True):
-                    serializer.save(writer=request.user, doctor=profile)
-                    update_rating(profile)
-                    return Response(data=serializer.data, status=status.HTTP_201_CREATED)
-                return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                serializer.is_valid(raise_exception=True)
+                serializer.save(writer=request.user, doctor=profile)
+                update_rating(profile)
+                return Response(data=serializer.data, status=status.HTTP_201_CREATED)
     except Profile.DoesNotExist:
         raise NotFound(detail='this doctor does not exist')
     

@@ -10,12 +10,6 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         view_name='complaint-detail',
         many=True
     )
-    meets_in = serializers.HyperlinkedRelatedField(
-        read_only=True,
-        view_name='profile-detail',
-        many=True,
-        lookup_field='slug'
-    )
     appointments_in = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='appointment-detail',
@@ -23,7 +17,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     )
     class Meta:
         model = User
-        fields = ['url', 'id', 'email', 'username', 'password', 'password2', 'category', 'first_name', 'last_name', 'phone_number',  'complaints', 'meets_in', 'appointments_in']
+        fields = ['url', 'id', 'email', 'username', 'password', 'password2', 'category', 'first_name', 'last_name', 'phone_number',  'complaints', 'appointments_in']
         extra_kwargs = {
             'password': {'write_only': True},
             'url': {'lookup_field': 'username'},
@@ -35,6 +29,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         if data["password"] != data["password2"]:
             raise serializers.ValidationError({'password': "second password does not match the first!"})
         return data
+
 
     def validate_phone_number(self, value):
         if len(value) == 11:
@@ -109,15 +104,11 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Profile
-        fields = ['url', 'id', 'user', 'slug', 'specialization', 'patient_type', 'meets', 'appointments_booked', 'reviews', 'rating']
+        fields = ['url', 'id', 'user', 'slug', 'specialization', 'patient_type', 'appointments_booked', 'reviews', 'rating']
         extra_kwargs = {
             'url': {'lookup_field': 'slug'},
             'id': {'read_only': True},
             'user': {
-                'lookup_field': 'username',
-                'read_only': True
-                },
-            'meets': {
                 'lookup_field': 'username',
                 'read_only': True
                 },
@@ -127,8 +118,7 @@ class ProfileSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ChangePasswordSerializer(serializers.Serializer):
-    old_password = serializers.CharField(write_only=True, required=True)
-    password = serializers.CharField(write_only=True, required=True)
+    new_password = serializers.CharField(write_only=True, required=True)
     confirm_password = serializers.CharField(write_only=True, required=True)
 
 
@@ -137,7 +127,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     doctor = serializers.SerializerMethodField('get_doctor_name')
     class Meta:
         model = DoctorReview
-        fields = ['writer','id', 'doctor', 'body', 'stars']
+        fields = ['url', 'writer','id', 'doctor', 'body', 'stars']
         extra_kwargs = {
             'id': {'read_only': True}
         }

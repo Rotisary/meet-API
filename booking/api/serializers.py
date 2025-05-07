@@ -1,6 +1,6 @@
 import datetime
 from rest_framework import serializers
-from booking.models import Complaint, Appointment, Symptom
+from booking.models import Complaint, Meet, Appointment, Symptom
 
 
 class ComplaintSerializer(serializers.HyperlinkedModelSerializer):
@@ -8,9 +8,14 @@ class ComplaintSerializer(serializers.HyperlinkedModelSerializer):
         read_only=True,
         many=True
     )
+    meet = serializers.HyperlinkedRelatedField(
+        view_name = 'meet-detail',
+        read_only = True,
+        lookup_field='ID'  
+    )
     class Meta:
         model = Complaint
-        fields = ['id', 'symptoms', 'sex', 'year_of_birth', 'age_group', 'patient', 'treated_by']
+        fields = ['id', 'url', 'symptoms', 'sex', 'year_of_birth', 'age_group', 'patient', 'treated_by', 'meet']
         extra_kwargs = {
             'patient': {
                 'lookup_field': 'username',
@@ -38,6 +43,34 @@ class ComplaintSerializer(serializers.HyperlinkedModelSerializer):
         return Complaint.objects.create(**validated_data)
     
 
+
+class MeetSerializer(serializers.HyperlinkedModelSerializer):
+    patient = serializers.SerializerMethodField('get_patient_name')
+    class Meta:
+        model = Meet
+        fields = ['url', 'ID', 'doctor', 'patient', 'complaint']
+        extra_kwargs = {
+            'url': {'lookup_field': 'ID'},
+            'ID': {'read_only': True},
+            'doctor': {
+                'view_name': 'profile-detail',
+                'lookup_field': 'slug',
+                'read_only': True
+            },
+            'complaint': {
+                'view_name': 'complaint-detail',
+                'read_only': True
+            }
+        }
+
+
+    def get_patient_name(self, obj):
+        first_name = obj.patient.first_name
+        last_name = obj.patient.last_name
+        full_name = f"{first_name} {last_name}"
+        return full_name
+    
+
 class SymptomSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Symptom
@@ -53,7 +86,7 @@ class AppointmentSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Appointment
-        fields = ['id', 'owner', 'patient', 'date_of_appointment', 'time_of_appointment']
+        fields = ['id', 'url', 'owner', 'patient', 'date_of_appointment', 'time_of_appointment']
         extra_kwargs = {
             'id': {
                 'read_only': True
@@ -64,6 +97,24 @@ class AppointmentSerializer(serializers.HyperlinkedModelSerializer):
                 'read_only': True
             },
         }
+
+    
+    def validate_date_of_appointment(self, value):
+        if value < datetime.date.today():
+            raise serializers.ValidationError({'error': 'enter valid date'})
+        return value
+    
+
+    def validate(self, data):
+        date_of_appointment = data.get('date_of_appointment')
+        time_of_appointment = data.get('time_of_appointment')
+
+        now = datetime.datetime.now()
+
+        if date_of_appointment == now.date() and time_of_appointment <= now.time():
+            raise serializers.ValidationError({'error': 'Enter a valid time.'})
+
+        return data
 
    
     def get_patient_name(self, appointment):

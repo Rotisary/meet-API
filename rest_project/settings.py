@@ -13,10 +13,12 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 import dj_database_url
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+load_dotenv()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -25,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'meet-api-3uf7.onrender.com']
 
@@ -48,7 +50,8 @@ INSTALLED_APPS = [
 
     # third party apps
     'rest_framework',
-    'rest_framework.authtoken'
+    'rest_framework.authtoken',
+    'rest_framework_api_key'
 ]
 
 MIDDLEWARE = [
@@ -82,15 +85,16 @@ TEMPLATES = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        # 'rest_framework.permissions.IsAuthenticated',
+        'rest_framework_api_key.permissions.HasAPIKey'
     ],
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
-        'users.api.custom_throttles.BurstUserRateThrottle',
-        'users.api.custom_throttles.SustainedUserRateThrottle'
+        'users.api.core.custom_throttles.BurstUserRateThrottle',
+        'users.api.core.custom_throttles.SustainedUserRateThrottle'
     ],
     'DEFAULT_THROTTLE_RATES': {
         'anon': '50/day',
@@ -98,7 +102,7 @@ REST_FRAMEWORK = {
         'sustained': '100/day'
     },
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 2,
+    'PAGE_SIZE': 5,
     'DEFAULT_PARSER_CLASS': [
         'rest_framework.parsers.FileUploadParser'
     ],
@@ -106,7 +110,7 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer'
     ],
     'DEFAULT_METADATA_CLASS': 'rest_framework.metadata.SimpleMetadata',
-    'EXCEPTION_HANDLER': 'users.api.utils.custom_exception_handler'
+    'EXCEPTION_HANDLER': 'users.api.core.utils.custom_exception_handler'
 }
 
 AUTH_USER_MODEL = "users.User"
@@ -116,27 +120,23 @@ WSGI_APPLICATION = 'rest_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-
-# DB_NAME = "rest_framework_db"
-# DB_USER = "django"
-# DB_PASSWORD = "password"
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': DB_NAME,
-#         'USER': DB_USER,
-#         'PASSWORD': DB_PASSWORD,
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
-
 DATABASES = {
-    'default': dj_database_url.config(
-        default = os.getenv('DATABASE_URL'),
-        conn_max_age=600
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': 'localhost',
+        'PORT': 5432,
+    }
 }
+
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         default = os.getenv('DATABASE_URL'),
+#         conn_max_age=600
+#     )
+# }
 
 
 # Password validation
@@ -169,6 +169,16 @@ USE_I18N = True
 
 USE_TZ = True
 
+# API_KEY_CUSTOM_HEADER = "HTTP_X_API_KEY"
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 465
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = 'oladotunkolapo@gmail.com'
+EMAIL_HOST_PASSWORD = 'jvmlojprtkatpckb'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/

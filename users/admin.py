@@ -1,9 +1,30 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from django import forms
+from django.contrib.auth.forms import UserCreationForm 
 from .models import User, Profile, DoctorReview, APIUser
 
 
-class NewUserAdmin(UserAdmin):
+class UserCreationForm(UserCreationForm):
+    class Meta:
+        model = User
+        fields = ('email', 'username', 'category', 'first_name', 'last_name', 'password1', 'password2')
+        
+
+class CustomUserAdmin(UserAdmin):
+    add_form = UserCreationForm
+    fieldsets = UserAdmin.fieldsets + (
+        ('Additional Info', {'fields': ('phone_number')}),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'username', 'first_name', 'last_name', 'category', 'password1', 'password2', 'phone_number'),
+        }),
+    )
+
+
+class NewUserAdmin(CustomUserAdmin):
     list_display = ('email', 'username', 'first_name', 'last_name', 'category', 'date_joined', 'last_login')
     search_fields = ('email', 'username', 'first_name', 'last_name')
     readonly_fields = ('date_joined', 'last_login')

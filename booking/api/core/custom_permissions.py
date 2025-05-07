@@ -1,5 +1,6 @@
 from rest_framework  import permissions
 from rest_framework.filters import SearchFilter
+from rest_framework.exceptions import ValidationError
 from users.models import User
 from rest_framework.metadata import SimpleMetadata
 
@@ -18,13 +19,29 @@ class UserIsDoctor(permissions.BasePermission):
         return not request.user.category == 'PT'
     
 
-class ComplaintDetailPerm(permissions.BasePermission):
+class ComplaintPerm(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        username = request.query_params.get('username')
+        if not username:
+            raise ValidationError('error. Please add the username of the patient')
+        else:
+            user = User.objects.get(username=username)
+            return user.meets_booked.filter(has_ended=False, doctor=request.user.profile).exists()
+        
         
     def has_object_permission(self, request, view, obj):
         if request.user.category == 'PT':
             return request.user == obj.patient
         else:
-            return request.user.profile in obj.patient.meets_in.all()
+            user = obj.patient
+            return user.meets_booked.filter(has_ended=False, doctor=request.user.profile).exists()
+        
+
+class MeetDetailPerm(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        return request.user == obj.patient or request.user == obj.doctor.user
         
 
 class AppointmentDetailPerm(permissions.BasePermission):
@@ -48,10 +65,8 @@ class DoctorsComplaintPerm(permissions.BasePermission):
         return not user.category == 'PT'
     
 
-# class CustomSimpleMetadata(SimpleMetadata):
+class ComplaintUpdatePerm(permissions.BasePermission):
+    message = 'you cannot update this complaint'
 
-#     def determine_metadata(self, request, view):
-#         return {
-#             'name': view.get_view_name(),
-#             'description': view.get_view_description()
-#         }
+    def has_object_permission(self, request, view, obj):
+        return not obj.tested_by
