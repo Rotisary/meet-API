@@ -87,16 +87,6 @@ class User(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return True
-    
-
-class APIUser(User):
-    class Meta:
-        proxy = True
-
-    def save(self, *args, **kwargs):
-        self.category = 'API'
-        self.is_api_user = True
-        return super().save(*args, **kwargs)
 
 
 class Profile(models.Model):

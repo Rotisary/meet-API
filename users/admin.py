@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django import forms
 from django.contrib.auth.forms import UserCreationForm 
-from .models import User, Profile, DoctorReview, APIUser
+from .models import User, Profile, DoctorReview
 
 
 class UserCreationForm(UserCreationForm):
@@ -52,6 +52,5 @@ class ProfileAdmin(admin.ModelAdmin):
 
 
 admin.site.register(User, NewUserAdmin)
-admin.site.register(APIUser)
 admin.site.register(Profile, ProfileAdmin)
 admin.site.register(DoctorReview, DoctorReviewAdmin)

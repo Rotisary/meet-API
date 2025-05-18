@@ -27,7 +27,7 @@ load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'meet-api-3uf7.onrender.com']
 
@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'booking.apps.BookingConfig',
     'users.apps.UsersConfig',
 
-
+    # django apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -47,11 +47,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-
     # third party apps
     'rest_framework',
-    'rest_framework.authtoken',
-    'rest_framework_api_key'
+    'rest_framework.authtoken'
 ]
 
 MIDDLEWARE = [
@@ -85,11 +83,10 @@ TEMPLATES = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        # 'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        # 'rest_framework.permissions.IsAuthenticated',
-        'rest_framework_api_key.permissions.HasAPIKey'
+        'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
@@ -120,23 +117,24 @@ WSGI_APPLICATION = 'rest_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': 'localhost',
-        'PORT': 5432,
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DB_NAME'),
+            'USER': os.getenv('DB_USER'),
+            'PASSWORD': os.getenv('DB_PASSWORD'),
+            'HOST': 'localhost',
+            'PORT': 5432,
+        }
     }
-}
-
-# DATABASES = {
-#     'default': dj_database_url.config(
-#         default = os.getenv('DATABASE_URL'),
-#         conn_max_age=600
-#     )
-# }
+else:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default = os.getenv('DATABASE_URL'),
+            conn_max_age=600
+        )
+    }
 
 
 # Password validation
@@ -169,7 +167,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-# API_KEY_CUSTOM_HEADER = "HTTP_X_API_KEY"
 CELERY_BROKER_URL = "redis://localhost:6379/0"
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

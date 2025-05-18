@@ -14,7 +14,6 @@ from rest_framework.generics import ListAPIView
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
-from rest_framework_api_key.permissions import HasAPIKey
 
 from booking.models import Complaint, Meet, Appointment, Symptom
 from users.models import Profile, User
@@ -123,19 +122,19 @@ def api_update_doctor_match_view(request, pk):
     
 
 @api_view(['GET', ])
-@permission_classes([HasAPIKey])
+@permission_classes([IsAuthenticated])
 @renderer_classes([JSONRenderer, BrowsableAPIRenderer])
 def api_complaint_detail_view(request, pk):
     try:
         complaint = Complaint.objects.get(id=pk)
     
-        # permission_class = ComplaintPerm()
-        # if not permission_class.has_object_permission(request, None, complaint):
-        #     raise PermissionDenied
-        # else:
-        if request.method == 'GET':
-            serializer = ComplaintSerializer(complaint, context={'request': request})
-            return Response(serializer.data, status=status.HTTP_200_OK)
+        permission_class = ComplaintPerm()
+        if not permission_class.has_object_permission(request, None, complaint):
+            raise PermissionDenied
+        else:
+            if request.method == 'GET':
+                serializer = ComplaintSerializer(complaint, context={'request': request})
+                return Response(serializer.data, status=status.HTTP_200_OK)
     except Complaint.DoesNotExist:
         raise NotFound(detail='this complaint does not exist')
 

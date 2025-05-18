@@ -23,8 +23,7 @@ from users.api.serializers import (
     UserUpdateSerializer,
     ProfileSerializer,
     ReviewSerializer, 
-    ChangePasswordSerializer,
-    APIUserSerializer
+    ChangePasswordSerializer
 )
 from users.models import User, Profile, DoctorReview
 from booking.api.core.custom_permissions import UserIsPatient, ReviewDetailPerm
@@ -53,21 +52,6 @@ def registration_view(request):
         data['phone_number'] = newuser.phone_number
         data['token'] = token
         return Response(data)
- 
-
-@api_view(['POST', ])
-@permission_classes([])
-def CreateAPIAccount(request):
-    if request.method == "POST":
-        serializer = APIUserSerializer(data=request.data, context={'request': request})
-        data = {}
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        token = Token.objects.get(user=user).key
-        data['response'] = 'account created'
-        data['token'] = token
-
-        return Response(data=data, status=status.HTTP_201_CREATED)
 
 
 class ObtainAuthTokenView(APIView):

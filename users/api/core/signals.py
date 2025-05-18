@@ -2,7 +2,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 from django.conf import settings
-from users.models import APIUser, Profile
+from users.models import Profile
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
@@ -22,20 +22,3 @@ def create_profile(sender, instance, created=False, **kwargs):
 def save_profile(sender, instance,  **kwargs):
         if instance.category == 'DR':
             instance.profile.save()
-    
-
-@receiver(post_save, sender=APIUser)
-def create_api_auth_token(sender, instance, created=False, **kwargs):
-    if created:
-        Token.objects.create(user=instance)
-
-
-@receiver(post_save, sender=APIUser)
-def create_api_profile(sender, instance, created=False, **kwargs):
-    if created:
-        Profile.objects.create(user=instance)
-
-
-@receiver(post_save, sender=APIUser)
-def save_api_profile(sender, instance,  **kwargs):
-    instance.profile.save()

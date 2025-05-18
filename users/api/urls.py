@@ -12,7 +12,6 @@ from users.api.views import (
     api_review_detail_view,
     api_delete_review_view,
     api_review_list_view,
-    CreateAPIAccount,
     ObtainAuthTokenView,
     ChangePasswordApiView,
 )
@@ -33,5 +32,4 @@ urlpatterns = [
     path('review/<int:pk>/', api_review_detail_view, name='doctorreview-detail'),
     path('review/<int:pk>/delete', api_delete_review_view, name='delete-review'),
     path('reviews/<str:username>/list/', api_review_list_view, name='review-list'),
-    path('register/apiuser/', CreateAPIAccount, name='create-api-account')
 ]
