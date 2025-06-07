@@ -32,7 +32,7 @@ class Complaint(models.Model):
     patient = models.ForeignKey(settings.AUTH_USER_MODEL, 
                                 related_name='complaints', 
                                 on_delete=models.CASCADE)
-    symptoms = models.ManyToManyField(Symptom, related_name='complaints', blank=True)
+    symptom = models.CharField(max_length=255, blank=True)
     sex = models.CharField(choices=SEX_CHOICES, blank=False, null=False)
     year_of_birth = models.IntegerField(null=False, blank=False)
     age_group = models.CharField(choices=AGE_GROUP_CHOICES, default=PRETEEN, blank=False, null=False)

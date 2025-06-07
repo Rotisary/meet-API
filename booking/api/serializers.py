@@ -4,10 +4,6 @@ from booking.models import Complaint, Meet, Appointment, Symptom
 
 
 class ComplaintSerializer(serializers.HyperlinkedModelSerializer):
-    symptoms = serializers.StringRelatedField(
-        read_only=True,
-        many=True
-    )
     meet = serializers.HyperlinkedRelatedField(
         view_name = 'meet-detail',
         read_only = True,
@@ -15,7 +11,7 @@ class ComplaintSerializer(serializers.HyperlinkedModelSerializer):
     )
     class Meta:
         model = Complaint
-        fields = ['id', 'url', 'symptoms', 'sex', 'year_of_birth', 'age_group', 'patient', 'treated_by', 'meet']
+        fields = ['id', 'url', 'symptom', 'sex', 'year_of_birth', 'age_group', 'patient', 'treated_by', 'meet']
         extra_kwargs = {
             'patient': {
                 'lookup_field': 'username',

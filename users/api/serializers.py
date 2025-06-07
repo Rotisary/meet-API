@@ -71,7 +71,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Profile
-        fields = ['url', 'id', 'user', 'slug', 'specialization', 'patient_type', 'appointments_booked', 'reviews', 'rating']
+        fields = ['url', 'id', 'user', 'slug', 'specialization', 'patient_type', 'meets_booked_for',  'appointments_booked', 'reviews', 'rating']
         extra_kwargs = {
             'url': {'lookup_field': 'slug'},
             'id': {'read_only': True},
@@ -79,6 +79,13 @@ class ProfileSerializer(serializers.HyperlinkedModelSerializer):
                 'lookup_field': 'username',
                 'read_only': True
                 },
+            'meets_booked_for': {
+                'lookup_field': 'ID',
+                'read_only': True
+            },
+            'appointments_booked': {
+                'read_only': True
+            },
             'rating': {'read_only': True},
             'slug': {'read_only': True}
         }

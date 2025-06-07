@@ -60,20 +60,17 @@ class SymptomsList(ListAPIView):
 def api_match_doctor_view(request):  
      
     if request.method == 'POST':
-        symptoms = request.query_params.get('symptoms')
-        if not symptoms:
-            return Response(data={'error': 'please add symptoms to query_parameter'}, status=status.HTTP_400_BAD_REQUEST)
+        symptom = request.query_params.get('symptom')
+        if not symptom:
+            return Response(data={'error': 'please add symptom to query_parameter'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            symptoms_list = split_symptoms(symptoms)
-
             serializer = ComplaintSerializer(data=request.data, context={'request': request})
             serializer.is_valid(raise_exception=True)
-            new_complaint = Complaint(**serializer.validated_data, patient=request.user)
-            add_complaint_symptoms(symptoms_list, Symptom, new_complaint, NotFound)
-                
-            data = filter_doctors(new_complaint, Profile, ProfileSerializer, request)
+            new_complaint = Complaint(**serializer.validated_data, patient=request.user)                     
+            data = filter_doctors(new_complaint, symptom, Profile, ProfileSerializer, request) 
+            symptom_obj = Symptom.objects.get(ID=symptom)
+            new_complaint.symptom = symptom_obj.Name
             new_complaint.save()
-            
             return Response(data, status=status.HTTP_201_CREATED)
 
         
