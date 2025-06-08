@@ -28,6 +28,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+PRODUCTION = os.getenv('PRODUCTION', False)
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'meet-api-3uf7.onrender.com']
 
@@ -117,7 +118,7 @@ WSGI_APPLICATION = 'rest_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-if DEBUG:
+if not PRODUCTION:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
