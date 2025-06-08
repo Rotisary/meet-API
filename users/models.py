@@ -51,11 +51,9 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser):
     DOCTOR = 'DR'
     PATIENT = 'PT'
-    API_USER = 'API'
     CATEGORY_CHOICE = [
         (DOCTOR, 'doctor'),
-        (PATIENT, 'patient'),
-        (API_USER, 'api user')
+        (PATIENT, 'patient')
     ]
     email = models.EmailField(max_length=251, verbose_name='email', unique=True)
     username = models.CharField(max_length=30, unique=True)
