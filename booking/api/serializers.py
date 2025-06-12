@@ -1,6 +1,9 @@
 import datetime
 from rest_framework import serializers
 from booking.models import Complaint, Meet, Appointment, Symptom
+from users.api.serializers import ProfileSerializer
+from users.models import Profile
+from booking.api.utils.ext_api_helpers import filter_doctors
 
 
 class ComplaintSerializer(serializers.HyperlinkedModelSerializer):
@@ -33,6 +36,16 @@ class ComplaintSerializer(serializers.HyperlinkedModelSerializer):
         elif value > datetime.datetime.now().year:
             raise serializers.ValidationError({'error': 'year is invalid'})
         return value
+    
+
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        request = self.context["request"]
+        data = filter_doctors(instance, Profile, ProfileSerializer, request)
+        obj = instance.save()
+        return data, obj
 
 
     def create(self, validated_data):

@@ -6,20 +6,21 @@ load_dotenv()
 
 
 def get_func_arguments(complaint):
+    symptom = complaint.symptom
     sex = complaint.sex
     year_of_birth = complaint.year_of_birth
     age_group = complaint.age_group
-    return sex, year_of_birth, age_group
+    return symptom, sex, year_of_birth, age_group
 
 
-def filter_doctors(complaint, symptom, profile, serializer, request):
+def filter_doctors(complaint, profile, serializer, request):
     # get apimedic authentication token
     secret_key = os.getenv('APIMEDIC_SECRET_KEY')
     requested_uri = "https://authservice.priaid.ch/login"
     token = get_token(secret_key, requested_uri)
 
     # get external api results
-    sex, year_of_birth, age_group = get_func_arguments(complaint)
+    symptom, sex, year_of_birth, age_group = get_func_arguments(complaint)
     specialisations_list, issues = get_api_data(token, symptom, sex, year_of_birth)
 
     # filter results and add relevant doctors to new list

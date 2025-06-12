@@ -57,63 +57,36 @@ class SymptomsList(ListAPIView):
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated, UserIsPatient])
 @parser_classes([JSONParser, MultiPartParser])
-def api_match_doctor_view(request):  
-     
+def api_match_doctor_view(request):      
     if request.method == 'POST':
-        symptom = request.query_params.get('symptom')
-        if not symptom:
-            return Response(data={'error': 'please add symptom to query_parameter'}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            serializer = ComplaintSerializer(data=request.data, context={'request': request})
-            serializer.is_valid(raise_exception=True)
-            new_complaint = Complaint(**serializer.validated_data, patient=request.user)                     
-            data = filter_doctors(new_complaint, symptom, Profile, ProfileSerializer, request) 
-            symptom_obj = Symptom.objects.get(ID=symptom)
-            new_complaint.symptom = symptom_obj.Name
-            new_complaint.save()
-            return Response(data, status=status.HTTP_201_CREATED)
+        serializer = ComplaintSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        new_complaint = Complaint(**serializer.validated_data, patient=request.user)                     
+        data = filter_doctors(new_complaint, Profile, ProfileSerializer, request) 
+        new_complaint.save()
+        return Response(data, status=status.HTTP_201_CREATED)
 
         
-@api_view(['PUT', ])
+@api_view(['PATCH', ])
 @permission_classes([IsAuthenticated,])
 @parser_classes([JSONParser, MultiPartParser])
 def api_update_doctor_match_view(request, pk):
-    if request.method == 'PUT':
+    if request.method == 'PATCH':
         try:
             complaint = Complaint.objects.get(id=pk)
 
-            permission_class = ComplaintUpdatePerm()
-            if not permission_class.has_object_permission(request, None, complaint):
+            if complaint.patient != request.user:
                 raise PermissionDenied
-            else:
-                if complaint.patient != request.user:
-                    raise PermissionDenied
-                else:           
-                    serializer = ComplaintSerializer(complaint, data=request.data, partial=True)
-                    symptoms = request.query_params.get('symptoms')
-                    data = {}
-                    if not symptoms:
-                        serializer.is_valid(raise_exception=True)
-                        result = filter_doctors(complaint, Profile, ProfileSerializer, request)
-                        serializer.save()
-                        data = {
-                            'message': "Here's your updated list of suggestions",
-                            'suggestions': result
-                        }
-                        return Response(data=data, status=status.HTTP_200_OK)
-                    else:
-                        symptoms_list = split_symptoms(symptoms)   
-                        add_complaint_symptoms(symptoms_list, Symptom, complaint, NotFound)
-                            
-                        serializer.is_valid(raise_exception=True)
-                        result = filter_doctors(complaint, Profile, ProfileSerializer, request)
-                        serializer.save()
-                        complaint.save()
-                        data = {
-                            'message': "Here's your updated list of suggestions",
-                            'suggestions': result
-                        }
-                        return Response(data=data, status=status.HTTP_200_OK)
+            else:           
+                serializer = ComplaintSerializer(complaint, data=request.data, partial=True, context={'request': request})                            
+                serializer.is_valid(raise_exception=True)
+                # result = filter_doctors(complaint, Profile, ProfileSerializer, request)
+                result, obj = serializer.save()
+                data = {
+                    'message': "Here's your updated list of suggestions",
+                    'suggestions': result
+                }
+                return Response(data=data, status=status.HTTP_200_OK)
         except Complaint.DoesNotExist:
             raise NotFound(detail='this complaint does not exist')
     

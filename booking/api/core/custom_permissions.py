@@ -69,4 +69,4 @@ class ComplaintUpdatePerm(permissions.BasePermission):
     message = 'you cannot update this complaint'
 
     def has_object_permission(self, request, view, obj):
-        return not obj.tested_by
+        return not obj.treated_by
