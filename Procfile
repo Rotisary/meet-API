@@ -1,1 +1,1 @@
-worker: celery -A rest_project worker --loglevel=info
+worker: celery -A rest_project worker --loglevel=info --pool=solo
