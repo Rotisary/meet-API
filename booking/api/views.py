@@ -51,6 +51,7 @@ class SymptomsList(ListAPIView):
     renderer_classes = ([JSONRenderer, BrowsableAPIRenderer])
     serializer_class = SymptomSerializer
     queryset = Symptom.objects.all()
+    ordering = ["ID"]
 
 
 @api_view(['POST', ])
