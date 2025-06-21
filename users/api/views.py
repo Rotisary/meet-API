@@ -26,10 +26,14 @@ from users.api.serializers import (
     ChangePasswordSerializer
 )
 from users.models import User, Profile, DoctorReview
-from booking.api.core.custom_permissions import UserIsPatient, ReviewDetailPerm
 from .core.utils import CustomPagination
-from .core.custom_permissions import OTPVerifiedPermission
-from .utils.profile_utils import update_rating
+from .core.custom_permissions import (
+    UserIsDoctor,
+    UserIsPatient,
+    OTPVerifiedPermission,
+    ReviewDetailPerm
+)
+from .core.tasks import update_rating
 from .utils.password_utils import generate_otp
 
 
@@ -161,14 +165,15 @@ def api_request_otp_view(request):
         generate_otp(user_email)
         return Response(data={'message':'the otp has been sent to your email'}, status=status.HTTP_200_OK)
     except User.DoesNotExist:
-        raise NotFound(detail='This user does not exist')
+        raise NotFound(detail='invalid credentials')
 
 
 @api_view(['GET', ])
 @authentication_classes([])
 @permission_classes([])
 @renderer_classes([JSONRenderer, BrowsableAPIRenderer])
-def api_verify_otp_view(request, email):
+def api_verify_otp_view(request):
+    email = request.query_params.get('email')
     user_otp = request.query_params.get('otp')
     saved_otp = cache.get(f'{email}_otp')
 
@@ -238,8 +243,8 @@ def api_profile_view(request, slug):
             else:
                 serializer = ProfileSerializer(profile, context={'request': request})
                 data = serializer.data
-                if request.user != profile.user:
-                    data.pop('meets')
+                if request.user.category == 'PT':
+                    data.pop('meets_booked_for')
                     data.pop('appointments_booked')
 
                 return Response(data=data, status=status.HTTP_200_OK)
@@ -283,7 +288,7 @@ def api_create_review_view(request, username):
                 serializer = ReviewSerializer(data=request.data)
                 serializer.is_valid(raise_exception=True)
                 serializer.save(writer=request.user, doctor=profile)
-                update_rating(profile)
+                update_rating.delay(profile)
                 return Response(data=serializer.data, status=status.HTTP_201_CREATED)
     except Profile.DoesNotExist:
         raise NotFound(detail='this doctor does not exist')

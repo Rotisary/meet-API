@@ -3,20 +3,6 @@ from rest_framework.filters import SearchFilter
 from rest_framework.exceptions import ValidationError
 from users.models import User
 from rest_framework.metadata import SimpleMetadata
-
-
-class UserIsPatient(permissions.BasePermission):
-    message = 'permission denied'
-
-    def has_permission(self, request, view):
-        return not request.user.category == 'DR'
-    
-
-class UserIsDoctor(permissions.BasePermission):
-    message = 'permission denied'
-    
-    def has_permission(self, request, view):
-        return not request.user.category == 'PT'
     
 
 class ComplaintPerm(permissions.BasePermission):
@@ -50,12 +36,6 @@ class AppointmentDetailPerm(permissions.BasePermission):
         return request.user == obj.patient or request.user.profile == obj.owner 
         
 
-class ReviewDetailPerm(permissions.BasePermission):
-        
-    def has_object_permission(self, request, view, obj):
-        return request.user.category == 'PT' or request.user == obj.doctor.user 
-
-
 class DoctorsComplaintPerm(permissions.BasePermission):
     message = 'bad request'
     
@@ -69,4 +49,4 @@ class ComplaintUpdatePerm(permissions.BasePermission):
     message = 'you cannot update this complaint'
 
     def has_object_permission(self, request, view, obj):
-        return not obj.treated_by
+        return obj.treated_by == None

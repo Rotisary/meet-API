@@ -24,9 +24,8 @@ from booking.api.serializers import (
     SymptomSerializer
 )
 from users.api.serializers import ProfileSerializer
+from users.api.core.custom_permissions import UserIsPatient, UserIsDoctor
 from booking.api.core.custom_permissions import (
-    UserIsDoctor, 
-    UserIsPatient, 
     ComplaintPerm, 
     MeetDetailPerm,
     AppointmentDetailPerm, 
@@ -70,23 +69,31 @@ def api_match_doctor_view(request):
 @api_view(['PATCH', ])
 @permission_classes([IsAuthenticated,])
 @parser_classes([JSONParser, MultiPartParser])
-def api_update_doctor_match_view(request, pk):
+def api_update_match_doctor_view(request, pk):
     if request.method == 'PATCH':
         try:
             complaint = Complaint.objects.get(id=pk)
 
             if complaint.patient != request.user:
                 raise PermissionDenied
-            else:           
-                serializer = ComplaintSerializer(complaint, data=request.data, partial=True, context={'request': request})                            
-                serializer.is_valid(raise_exception=True)
-                # result = filter_doctors(complaint, Profile, ProfileSerializer, request)
-                result, obj = serializer.save()
-                data = {
-                    'message': "Here's your updated list of suggestions",
-                    'suggestions': result
-                }
-                return Response(data=data, status=status.HTTP_200_OK)
+            else: 
+                permission_class = ComplaintUpdatePerm()
+                if not permission_class.has_object_permission(request, None, complaint):
+                    raise PermissionDenied
+                else:         
+                    serializer = ComplaintSerializer(
+                        complaint, 
+                        data=request.data, 
+                        partial=True, 
+                        context={'request': request}
+                    )                            
+                    serializer.is_valid(raise_exception=True)
+                    result, obj = serializer.save()
+                    data = {
+                        'message': "Here's your updated list of suggestions",
+                        'suggestions': result
+                    }
+                    return Response(data=data, status=status.HTTP_200_OK)
         except Complaint.DoesNotExist:
             raise NotFound(detail='this complaint does not exist')
     
@@ -152,7 +159,7 @@ def api_book_meet_view(request, username):
                         complaint.treated_by = None
                         complaint.save()
                     else:
-                        data['message'] = "You cannot delete this meet, it has already been confirmed by the doctor"
+                        data['message'] = "You cannot cancel this meet, it has already been confirmed by the doctor"
                         status_code = status.HTTP_400_BAD_REQUEST
                 else:
                     complaint.treated_by = doctor

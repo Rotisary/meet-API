@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 import dj_database_url
 from dotenv import load_dotenv
+from booking.api.utils.helpers import string_to_bool
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,7 +29,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-PRODUCTION = os.getenv('PRODUCTION', False)
+PRODUCTION = string_to_bool(os.getenv('PRODUCTION'))
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'meet-api-3uf7.onrender.com']
 
@@ -118,7 +119,14 @@ WSGI_APPLICATION = 'rest_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-if not PRODUCTION:
+if PRODUCTION:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default = os.getenv('DATABASE_URL'),
+            conn_max_age=600
+        )
+    }
+else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -128,13 +136,6 @@ if not PRODUCTION:
             'HOST': 'localhost',
             'PORT': 5432,
         }
-    }
-else:
-    DATABASES = {
-        'default': dj_database_url.config(
-            default = os.getenv('DATABASE_URL'),
-            conn_max_age=600
-        )
     }
 
 
@@ -168,7 +169,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", default="redis://localhost:6379/0")
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'

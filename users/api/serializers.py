@@ -54,7 +54,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['email', 'username', 'first_name', 'last_name', 'phone_number']
+        fields = ['username', 'first_name', 'last_name', 'phone_number']
     
 
     def validate_phone_number(self, value):

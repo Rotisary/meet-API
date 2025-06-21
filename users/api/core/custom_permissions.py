@@ -9,3 +9,23 @@ class OTPVerifiedPermission(permissions.BasePermission):
         email = request.query_params.get('email')
         if cache.get(f'otp_verified_{email}'):
             return True
+
+
+class UserIsPatient(permissions.BasePermission):
+    message = 'permission denied'
+
+    def has_permission(self, request, view):
+        return not request.user.category == 'DR'
+    
+
+class UserIsDoctor(permissions.BasePermission):
+    message = 'permission denied'
+    
+    def has_permission(self, request, view):
+        return not request.user.category == 'PT'
+
+    
+class ReviewDetailPerm(permissions.BasePermission):
+        
+    def has_object_permission(self, request, view, obj):
+        return request.user.category == 'PT' or request.user == obj.doctor.user 

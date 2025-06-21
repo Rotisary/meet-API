@@ -1,3 +1,8 @@
+def string_to_bool(value):
+    """ converts string to boolean for environment variables """
+    return value.lower() in ('true', '1', 'yes')
+
+
 def split_symptoms(symptoms):
     splited_symptoms = symptoms.split('_')
     symptoms_list = []
