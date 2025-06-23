@@ -159,6 +159,8 @@ def api_book_meet_view(request, username):
                         meet.delete()
                         complaint.treated_by = None
                         complaint.save()
+                        data['message'] = "Meet cancelled"
+                        status_code = status.HTTP_200_OK
                     else:
                         data['message'] = "Failed to cancel meet. This meet has already been confirmed"
                         status_code = status.HTTP_400_BAD_REQUEST
