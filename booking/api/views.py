@@ -28,6 +28,7 @@ from users.api.core.custom_permissions import UserIsPatient, UserIsDoctor
 from booking.api.core.custom_permissions import (
     ComplaintPerm, 
     MeetDetailPerm,
+    BookMeetPerm,
     AppointmentDetailPerm, 
     DoctorsComplaintPerm,
     ComplaintUpdatePerm
@@ -143,6 +144,10 @@ def api_book_meet_view(request, username):
         complaint_id = request.query_params.get('complaint')
         try:
             complaint = Complaint.objects.get(id=complaint_id)
+            permission_class = BookMeetPerm()
+            if not permission_class.has_object_permission(request, None, complaint):
+                raise PermissionDenied
+            
             data = {}
             status_code = None
             if doctor.active_meets_count() == 3:
@@ -206,7 +211,7 @@ def api_confirm_meet_view(request, ID):
             if meet.is_confirmed == False:
                 meet.is_confirmed = True
                 meet.save()
-                return Response(data='You have confirmed this meet', status=status.HTTP_200_OK)
+                return Response(data={"message": 'You have confirmed this meet'}, status=status.HTTP_200_OK)
             else:
                 raise PermissionDenied(detail='this meet has already been confirmed')
     except Meet.DoesNotExist:
@@ -225,7 +230,7 @@ def api_end_meet_view(request, ID):
                 meet.has_ended = True
                 meet.save()
                 send_meet_end_email.delay_on_commit(meet.ID, meet.patient.email, meet.doctor.user.email)
-                return Response(data='You have ended this meet', status=status.HTTP_200_OK)
+                return Response(data={"message": 'You have ended this meet'}, status=status.HTTP_200_OK)
             else:
                 raise PermissionDenied(detail='Failed to end meet, it has not been confirmed by the doctor yet')
     except meet.DoesNotExist:

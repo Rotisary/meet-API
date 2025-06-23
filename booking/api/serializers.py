@@ -57,7 +57,7 @@ class MeetSerializer(serializers.HyperlinkedModelSerializer):
     patient = serializers.SerializerMethodField('get_patient_name')
     class Meta:
         model = Meet
-        fields = ['url', 'ID', 'doctor', 'patient', 'complaint']
+        fields = ['url', 'ID', 'doctor', 'patient', 'complaint', 'has_ended', 'is_confirmed', 'created_at']
         extra_kwargs = {
             'url': {'lookup_field': 'ID'},
             'ID': {'read_only': True},

@@ -24,6 +24,12 @@ class ComplaintPerm(permissions.BasePermission):
             return user.meets_booked.filter(has_ended=False, doctor=request.user.profile).exists()
         
 
+class BookMeetPerm(permissions.BasePermission):
+    message = "you are not allowed to perform this action"
+
+    def has_object_permission(self, request, view, obj):
+        return request.user == obj.patient
+
 class MeetDetailPerm(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
