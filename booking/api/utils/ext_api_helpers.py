@@ -47,4 +47,4 @@ def filter_doctors(complaint, profile, serializer, request):
             object.pop('reviews')
 
         data['doctor suggestions'] = doctor_data_serializer.data
-        return data
+    return data
