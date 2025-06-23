@@ -55,7 +55,7 @@ def registration_view(request):
         data['last_name'] = newuser.last_name
         data['phone_number'] = newuser.phone_number
         data['token'] = token
-        return Response(data)
+        return Response(data, status=status.HTTP_201_CREATED)
 
 
 class ObtainAuthTokenView(APIView):
@@ -103,13 +103,12 @@ def api_user_detail_view(request, username):
         else:
             serializer = UserSerializer(user, context={'request': request})
             data = serializer.data
-            return Response(data=data)
+            return Response(data=data, status=status.HTTP_200_OK)
     except User.DoesNotExist:
         raise NotFound(detail='this user does not exist')
 
 
-
-@api_view(['PUT', ])
+@api_view(['PATCH', ])
 @permission_classes([IsAuthenticated])
 @parser_classes([JSONParser, MultiPartParser])
 def api_update_user_detail_view(request, username):
@@ -119,13 +118,16 @@ def api_update_user_detail_view(request, username):
         if request.user != user:
              raise PermissionDenied
         else:
-            if request.method == 'PUT':
+            if request.method == 'PATCH':
                 serializer = UserUpdateSerializer(user, data=request.data, partial=True)
-                data = {}
                 serializer.is_valid(raise_exception=True)
-                serializer.save()
-                data['success'] = 'update successful'
-                return Response(data=data)
+                instance = serializer.save()
+                serializer = UserSerializer(instance, context={'request': request})
+                data = {
+                    "success": "update successful",
+                    "details": serializer.data
+                }
+                return Response(data=data, status=status.HTTP_200_OK)
     except Profile.DoesNotExist:
         raise NotFound(detail='this user does not exist')
     
@@ -252,7 +254,7 @@ def api_profile_view(request, slug):
         raise NotFound(detail='this profile does not exist')
 
 
-@api_view(['PUT', ])
+@api_view(['PATCH', ])
 @permission_classes([IsAuthenticated])
 @parser_classes([JSONParser, MultiPartParser])
 def api_update_profile_view(request, slug):
@@ -263,13 +265,17 @@ def api_update_profile_view(request, slug):
         if request.user != profile.user:
             raise PermissionDenied
         else:
-            if request.method == 'PUT':
+            if request.method == 'PATCH':
                 serializer = ProfileSerializer(profile, data=request.data, partial=True)
-                data = {}
+                
                 serializer.is_valid(raise_exception=True)
-                serializer.save()
-                data['success'] = 'update successful'
-                return Response(data=data)
+                instance = serializer.save()
+                serializer = ProfileSerializer(instance, context={'request': request})
+                data = {
+                    "success": "update successful",
+                    "details": serializer.data
+                }
+                return Response(data=data, status=status.HTTP_200_OK)
     except Profile.DoesNotExist:
         raise NotFound(detail='this profile does not exist')
 

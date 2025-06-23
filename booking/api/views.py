@@ -128,7 +128,7 @@ class api_complaint_list_view(ListAPIView):
     def get_queryset(self):
         username = self.request.query_params.get('username')
         if not username:
-            raise ValidationError('error. Please add the username of the patient')
+            raise ValidationError('error. Add the username of the patient')
         else:
             queryset = Complaint.objects.filter(patient__username=username)
         return queryset
@@ -146,7 +146,7 @@ def api_book_meet_view(request, username):
             data = {}
             status_code = None
             if doctor.active_meets_count() == 3:
-                data['message'] = "This doctor is already booked for three meets, please find another doctor"
+                data['message'] = "Failed to book meet. Doctor active meet count is greater than limit"
                 status_code = status.HTTP_403_FORBIDDEN
             else:
                 meet, created = Meet.objects.get_or_create(
@@ -160,18 +160,20 @@ def api_book_meet_view(request, username):
                         complaint.treated_by = None
                         complaint.save()
                     else:
-                        data['message'] = "You cannot cancel this meet, it has already been confirmed by the doctor"
+                        data['message'] = "Failed to cancel meet. This meet has already been confirmed"
                         status_code = status.HTTP_400_BAD_REQUEST
                 else:
                     complaint.treated_by = doctor
                     complaint.save()
-                    data['message'] = "you have succesfully booked a meet with this doctor"
+                    serializer = MeetSerializer(meet, context={'request': request})
+                    data['message'] = "Meet booked successfully"
+                    data['details'] = serializer.data
                     status_code = status.HTTP_201_CREATED
             return Response(data=data, status=status_code)
         except Complaint.DoesNotExist:
-            raise NotFound(detail='sorry, seems this complaint has already been deleted')
+            raise NotFound(detail='Complaint not found')
     except Profile.DoesNotExist:
-        raise NotFound(detail='this doctor does not exist')
+        raise NotFound(detail='Profile not found')
     
 
 @api_view(['GET'])
@@ -223,7 +225,7 @@ def api_end_meet_view(request, ID):
                 send_meet_end_email.delay_on_commit(meet.ID, meet.patient.email, meet.doctor.user.email)
                 return Response(data='You have ended this meet', status=status.HTTP_200_OK)
             else:
-                raise PermissionDenied(detail='you cannot end this meet, it has not been confirmed by the doctor yet')
+                raise PermissionDenied(detail='Failed to end meet, it has not been confirmed by the doctor yet')
     except meet.DoesNotExist:
         raise NotFound(detail='this meet does not exist')
     
@@ -284,7 +286,7 @@ def api_create_appointment_view(request, username):
         raise NotFound(detail='this patient does not exist')
     
 
-@api_view(['PUT', ])
+@api_view(['PATCH', ])
 @permission_classes([IsAuthenticated])
 @parser_classes([JSONParser, MultiPartParser])
 def api_update_appointment_view(request, pk):
@@ -295,13 +297,16 @@ def api_update_appointment_view(request, pk):
         if appointment.owner != user.profile:
              raise PermissionDenied
         else:
-            if request.method == 'PUT':
+            if request.method == 'PATCH':
                 serializer = AppointmentSerializer(appointment, data=request.data, partial=True)
-                data = {}
                 serializer.is_valid(raise_exception=True)
-                serializer.save()
-                data['success'] = 'update successful'
-                return Response(data=data)
+                instance = serializer.save()
+                serializer = AppointmentSerializer(instance, context={'request': request})
+                data = {
+                    "success": "appointment updated successfully",
+                    "details": serializer.data
+                }
+                return Response(data=data, status=status.HTTP_200_OK)
     except Appointment.DoesNotExist:
         raise NotFound(detail='this appointment does not exist')
     
