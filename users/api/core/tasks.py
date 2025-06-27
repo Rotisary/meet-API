@@ -1,6 +1,7 @@
 from celery import shared_task
 from rest_project.settings import EMAIL_HOST_USER
 from django.core.mail import send_mail
+from users.models import Profile
 
 
 @shared_task
@@ -20,14 +21,16 @@ def send_otp_mail(email, otp):
     
 
 @shared_task
-def update_rating(profile):
+def update_rating(profile_id):
+    profile = Profile.objects.get(id=profile_id)
     profile_reviews = profile.reviews.all() 
     no_of_reviews = profile_reviews.count()
     sum_of_stars = 0
     for review in profile_reviews:
         sum_of_stars += review.stars
     try:
-        profile.rating = sum_of_stars/no_of_reviews
+        profile.rating = round(sum_of_stars/no_of_reviews, 1)
     except ZeroDivisionError:
         profile.rating = 0
-    return profile.save()
+    profile.save()
+    return True

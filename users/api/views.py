@@ -287,14 +287,15 @@ def api_create_review_view(request, username):
     try:
         profile = Profile.objects.get(user__username=username, user__category='DR')
     
-        if request.user not in profile.meets_booked_for.all():
+        meet_list =  profile.meets_booked_for.filter(patient=request.user)
+        if not meet_list.exists():
             raise PermissionDenied
         else:
             if request.method == 'POST':
-                serializer = ReviewSerializer(data=request.data)
+                serializer = ReviewSerializer(data=request.data, context={'request': request})
                 serializer.is_valid(raise_exception=True)
                 serializer.save(writer=request.user, doctor=profile)
-                update_rating.delay(profile)
+                update_rating.delay_on_commit(profile.id)
                 return Response(data=serializer.data, status=status.HTTP_201_CREATED)
     except Profile.DoesNotExist:
         raise NotFound(detail='this doctor does not exist')
