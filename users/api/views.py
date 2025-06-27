@@ -287,7 +287,7 @@ def api_create_review_view(request, username):
     try:
         profile = Profile.objects.get(user__username=username, user__category='DR')
     
-        if request.user not in profile.meets.all():
+        if request.user not in profile.meets_booked_for.all():
             raise PermissionDenied
         else:
             if request.method == 'POST':
