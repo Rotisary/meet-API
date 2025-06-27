@@ -42,7 +42,7 @@ from .utils.password_utils import generate_otp
 @parser_classes([JSONParser, MultiPartParser])
 def registration_view(request):
     if request.method == 'POST':
-        serializer = UserSerializer(data=request.data)
+        serializer = UserSerializer(data=request.data, context={'request': request})
         data = {}
         serializer.is_valid(raise_exception=True)
         newuser = serializer.save()
@@ -227,7 +227,7 @@ class ChangePasswordApiView(UpdateAPIView):
         user.set_password(new_password)
         user.save()
         return Response({
-            'password': 'password changed successfully!'}, 
+            'message': 'password changed successfully!'}, 
             status=status.HTTP_200_OK
             )
 
@@ -266,7 +266,11 @@ def api_update_profile_view(request, slug):
             raise PermissionDenied
         else:
             if request.method == 'PATCH':
-                serializer = ProfileSerializer(profile, data=request.data, partial=True)
+                serializer = ProfileSerializer(
+                    profile, 
+                    data=request.data, 
+                    partial=True,
+                    context={'request': request})
                 
                 serializer.is_valid(raise_exception=True)
                 instance = serializer.save()
@@ -313,7 +317,7 @@ def api_review_detail_view(request, pk):
             raise PermissionDenied
         else:
             if request.method == 'GET':
-                serializer = ReviewSerializer(review)
+                serializer = ReviewSerializer(review, context={'request': request})
                 return Response(serializer.data)
     except DoctorReview.DoesNotExist:
         raise NotFound(detail='this review does not exist')
@@ -350,5 +354,5 @@ def api_review_list_view(request, username):
     if request.method == 'GET':
         paginator_class = CustomPagination()
         queryset = paginator_class.paginate_queryset(reviews, request, None)
-        serializer = ReviewSerializer(queryset,  many=True)
+        serializer = ReviewSerializer(queryset,  context={"request": request}, many=True)
         return paginator_class.get_paginated_response(data=serializer.data)   
