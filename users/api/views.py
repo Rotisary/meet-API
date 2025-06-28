@@ -185,7 +185,7 @@ def api_verify_otp_view(request):
         return Response(data={'error': 'invalid otp'}, status=status.HTTP_400_BAD_REQUEST)
     else:
         cache.delete(f"{email}_otp")
-        cache.set(f"otp_verified_{email}", True, timeout=600)
+        cache.set(f"otp_verified_{email}", True, timeout=60)
         return Response(data={"message": "OTP verified"}, status=status.HTTP_200_OK)
 
 

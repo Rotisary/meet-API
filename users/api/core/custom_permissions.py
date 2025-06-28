@@ -3,7 +3,7 @@ from django.core.cache import cache
 
 
 class OTPVerifiedPermission(permissions.BasePermission):
-    message  = 'the otp has not been verified'
+    message  = 'user verification failed. Try again'
 
     def has_permission(self, request, view):
         email = request.query_params.get('email')
